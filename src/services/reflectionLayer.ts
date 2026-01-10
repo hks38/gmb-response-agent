@@ -5,6 +5,7 @@ export interface ContentToVerify {
   task: 'blog_post' | 'review_reply' | 'seo_post';
   keywords: string[];
   maxWords: number;
+  minWords?: number;
   originalPrompt?: string;
 }
 
@@ -25,7 +26,7 @@ export interface VerificationResult {
 export const verifyAndCorrectContent = async (
   contentToVerify: ContentToVerify
 ): Promise<VerificationResult> => {
-  const { content, task, keywords, maxWords, originalPrompt } = contentToVerify;
+  const { content, task, keywords, maxWords, minWords, originalPrompt } = contentToVerify;
 
   // Quick checks
   const wordCount = content.split(/\s+/).filter((w: string) => w.length > 0).length;
@@ -55,9 +56,12 @@ export const verifyAndCorrectContent = async (
   const issues: string[] = [];
   const improvements: string[] = [];
 
-  // Check word count
+  // Check word count - minimum and maximum
   if (wordCount > maxWords) {
     issues.push(`Word count (${wordCount}) exceeds maximum (${maxWords})`);
+  }
+  if (minWords && wordCount < minWords) {
+    issues.push(`Word count (${wordCount}) is below minimum (${minWords})`);
   }
 
   // Additional verification: ensure "Malama Dental" is mentioned
@@ -87,7 +91,7 @@ Original Content:
 ${content}
 
 Requirements:
-- Maximum ${maxWords} words (STRICT LIMIT - current: ${wordCount} words, MUST REDUCE)
+${wordCount > maxWords ? `- REDUCE word count to ${maxWords} words or less (current: ${wordCount} words, MUST REDUCE)` : minWords && wordCount < minWords ? `- INCREASE word count to at least ${minWords} words (current: ${wordCount} words, MUST EXPAND)` : `- Word count: ${minWords ? `${minWords}-${maxWords}` : `max ${maxWords}`} words (current: ${wordCount} words${minWords && wordCount < minWords ? ', NEEDS MORE' : wordCount > maxWords ? ', TOO LONG' : ', OK'})`}
 - Must include ALL keywords: ${keywords.join(', ')}
 - Missing keywords: ${keywordsMissing.length > 0 ? keywordsMissing.join(', ') : 'None'}
 - Current issues: ${issues.join('; ')}
@@ -98,18 +102,18 @@ Task: ${task === 'blog_post' || task === 'seo_post' ? `Google Business Profile p
 ${originalPrompt ? `Original prompt context:\n${originalPrompt.substring(0, 500)}\n` : ''}
 
 Correct the content to:
-1. REDUCE word count to EXACTLY ${maxWords} words or less (currently ${wordCount} words - be aggressive in cutting)
-2. Include ALL missing keywords naturally: ${keywordsMissing.join(', ')}
+${wordCount > maxWords ? `1. REDUCE word count to ${maxWords} words or less (currently ${wordCount} words - cut at least ${wordCount - maxWords} words)` : minWords && wordCount < minWords ? `1. INCREASE word count to at least ${minWords} words (currently ${wordCount} words - add at least ${minWords - wordCount} words)` : `1. Keep word count between ${minWords ? `${minWords}-${maxWords}` : `0-${maxWords}`} words`}
+2. Include ALL missing keywords naturally: ${keywordsMissing.length > 0 ? keywordsMissing.join(', ') : 'All keywords are present'}
 3. Maintain quality, tone, and readability
-4. Keep it concise, precise, and impactful
+4. Keep it ${wordCount < (minWords || 0) ? 'substantive and detailed' : 'concise, precise, and impactful'}
 5. Ensure "${businessName}" is mentioned naturally
 
 Return JSON with:
-- correctedContent: The corrected version (STRICT: ${maxWords} words or less, all ${keywords.length} keywords included)
+- correctedContent: The corrected version (${minWords ? `MINIMUM ${minWords} words, ` : ''}MAXIMUM ${maxWords} words, all ${keywords.length} keywords included)
 - improvements: Array of improvements made
-- wordCount: Final word count (must be <= ${maxWords})
+- wordCount: Final word count (must be ${minWords ? `>= ${minWords} and ` : ''}<= ${maxWords})
 
-CRITICAL: The corrected content MUST be ${maxWords} words or less. If current content is ${wordCount} words, you MUST cut at least ${wordCount - maxWords} words while keeping all keywords.`;
+CRITICAL: The corrected content MUST be ${minWords ? `at least ${minWords} words and ` : ''}${maxWords} words or less.${wordCount > maxWords ? ` Current content is ${wordCount} words - you MUST cut at least ${wordCount - maxWords} words while keeping all keywords.` : minWords && wordCount < minWords ? ` Current content is ${wordCount} words - you MUST add at least ${minWords - wordCount} words to meet the minimum.` : ''}`;
 
   try {
     const response = await llmService.generate({
@@ -143,10 +147,16 @@ CRITICAL: The corrected content MUST be ${maxWords} words or less. If current co
     );
 
     return {
-      verified: finalWordCount <= maxWords && finalKeywordsMissing.length === 0,
+      verified: finalWordCount <= maxWords && 
+                (!minWords || finalWordCount >= minWords) && 
+                finalKeywordsMissing.length === 0,
       correctedContent,
-      issues: finalWordCount > maxWords || finalKeywordsMissing.length > 0 
-        ? [`Word count: ${finalWordCount}/${maxWords}`, ...finalKeywordsMissing.map(k => `Missing: ${k}`)]
+      issues: (finalWordCount > maxWords || (minWords && finalWordCount < minWords) || finalKeywordsMissing.length > 0)
+        ? [
+            ...(finalWordCount > maxWords ? [`Word count: ${finalWordCount}/${maxWords} (too long)`] : []),
+            ...(minWords && finalWordCount < minWords ? [`Word count: ${finalWordCount}/${minWords} (too short, minimum ${minWords})`] : []),
+            ...finalKeywordsMissing.map(k => `Missing: ${k}`)
+          ]
         : [],
       wordCount: finalWordCount,
       keywordsFound: finalKeywordsFound,
@@ -169,7 +179,7 @@ CRITICAL: The corrected content MUST be ${maxWords} words or less. If current co
 /**
  * Verify content meets requirements (quick check without LLM)
  */
-export const quickVerify = (content: string, keywords: string[], maxWords: number): {
+export const quickVerify = (content: string, keywords: string[], maxWords: number, minWords?: number): {
   verified: boolean;
   wordCount: number;
   keywordsFound: string[];
@@ -183,8 +193,11 @@ export const quickVerify = (content: string, keywords: string[], maxWords: numbe
     !content.toLowerCase().includes(kw.toLowerCase())
   );
 
+  const meetsMinWords = !minWords || wordCount >= minWords;
+  const meetsMaxWords = wordCount <= maxWords;
+
   return {
-    verified: wordCount <= maxWords && keywordsMissing.length === 0,
+    verified: meetsMinWords && meetsMaxWords && keywordsMissing.length === 0,
     wordCount,
     keywordsFound,
     keywordsMissing,

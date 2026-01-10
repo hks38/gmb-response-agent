@@ -6,6 +6,7 @@ export interface PromptContext {
   topic?: string;
   constraints?: {
     maxWords?: number;
+    minWords?: number;
     minKeywords?: number;
     tone?: string;
     style?: string;
@@ -36,6 +37,7 @@ export const generateOptimizedPrompt = async (
 
   const {
     maxWords = 150,
+    minWords,
     minKeywords = 1,
     tone = 'warm, friendly, professional',
     style = 'concise and engaging',
@@ -49,6 +51,7 @@ Topic: ${topic || 'General dental care'}
 Keywords to include: ${keywords.join(', ')}
 Constraints:
 - Maximum words: ${maxWords}
+${minWords ? `- Minimum words: ${minWords} (MUST be at least ${minWords} words)` : ''}
 - Minimum keywords to include: ${minKeywords}
 - Tone: ${tone}
 - Style: ${style}
@@ -57,7 +60,7 @@ ${additionalContext ? `\nAdditional Context:\n${additionalContext}` : ''}
 Your job is to create an optimized prompt that will:
 1. Generate ${task === 'blog_post' || task === 'seo_post' ? 'a concise, SEO-optimized post' : 'a warm, professional review reply'}
 2. Naturally include ALL specified keywords (${keywords.length} keywords)
-3. Stay within ${maxWords} words maximum
+3. ${minWords ? `Stay between ${minWords}-${maxWords} words (minimum ${minWords} words, maximum ${maxWords} words)` : `Stay within ${maxWords} words maximum`}
 4. Maintain ${tone} tone
 5. Be ${style}
 
@@ -97,7 +100,7 @@ Return JSON with:
  */
 const generateFallbackPrompt = (context: PromptContext): GeneratedPrompt => {
   const { task, keywords, topic, constraints = {} } = context;
-  const { maxWords = 150, tone = 'warm, friendly, professional' } = constraints;
+  const { maxWords = 150, minWords, tone = 'warm, friendly, professional' } = constraints;
 
   let prompt = '';
 
@@ -132,7 +135,7 @@ Write the post now. Ensure every keyword appears naturally, mention "${businessN
 Practice Name: ${businessName} (ALWAYS use this exact name)
 
 Requirements:
-- Maximum ${maxWords} words (STRICT LIMIT)
+${minWords ? `- Minimum ${minWords} words, Maximum ${maxWords} words (MUST be at least ${minWords} words)` : `- Maximum ${maxWords} words (STRICT LIMIT)`}
 - Include these keywords naturally: ${keywords.join(', ')}
 - Always mention "${businessName}" naturally in the reply
 - Tone: ${tone}, spa-like, calming
@@ -141,7 +144,7 @@ Requirements:
 - No personal health info
 - Include ONE local SEO phrase from: ${keywords.join(', ')}
 
-Write the reply now. Keep it under ${maxWords} words, mention "${businessName}", and include all keywords naturally. Return plain text (not JSON).`;
+Write the reply now. ${minWords ? `Keep it between ${minWords}-${maxWords} words (minimum ${minWords} words required), ` : `Keep it under ${maxWords} words, `}mention "${businessName}", and include all keywords naturally. Return plain text (not JSON).`;
   }
 
   return {

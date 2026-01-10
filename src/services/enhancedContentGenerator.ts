@@ -9,6 +9,7 @@ export interface EnhancedGenerationOptions {
   keywords: string[];
   topic?: string;
   maxWords?: number;
+  minWords?: number;
   tone?: string;
   style?: string;
   additionalContext?: string;
@@ -38,6 +39,7 @@ export const generateEnhancedContent = async (
     keywords,
     topic,
     maxWords = 150,
+    minWords = task === 'review_reply' ? 25 : undefined,
     tone = 'warm, friendly, professional',
     style = 'concise and engaging',
     additionalContext = '',
@@ -91,6 +93,7 @@ Business Information:
     topic,
     constraints: {
       maxWords,
+      minWords,
       minKeywords: keywords.length,
       tone,
       style,
@@ -206,6 +209,7 @@ Business Information:
     task,
     keywords,
     maxWords,
+    minWords,
     originalPrompt: optimizedPrompt,
   });
 

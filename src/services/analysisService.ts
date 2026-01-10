@@ -80,7 +80,8 @@ export const analyzeReview = async (params: {
     task: 'review_reply',
     keywords: keywords,
     topic: `Reply to ${params.rating}-star review${params.comment ? `: "${params.comment.substring(0, 50)}..."` : ''}`,
-    maxWords: 150, // Strict 150 word limit
+    maxWords: 150, // Maximum 150 words
+    minWords: 25, // Minimum 25 words
     tone: 'warm, spa-like, calming',
     style: 'concise and professional',
     additionalContext: `
@@ -99,12 +100,13 @@ Rules:
 - End with exactly: "Warm regards,\n${businessConfig.name} Team" (new line after comma)
 - NEVER use placeholders like [Reviewer's Name], [Your Name], [Name], or any bracketed placeholders
 - NEVER repeat the name in the greeting (e.g., don't write "Dear Will Tagliareni, Will" - only "Dear Will,")
+- Word count: MINIMUM 25 words, MAXIMUM 150 words (MUST be at least 25 words)
 - Sign as ${businessConfig.name} Team (not as an individual)
 - Never confirm someone is a patient
 - Never mention procedures unless reviewer did
 - No personal health info
 - If rating <= 3 or sentiment negative, invite contact and do not argue
-- If no comment, write a short thank-you
+- If no comment, write a short thank-you (but still at least 25 words)
 - The reply_draft must be ready to post - use ONLY first name "${reviewerFirstName}" in greeting, never use placeholders
 `,
   });

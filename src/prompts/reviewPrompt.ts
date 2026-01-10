@@ -23,7 +23,7 @@ Rules:
 - Never confirm someone is a patient.
 - Never mention procedures unless the reviewer did.
 - No personal health info.
-- Keep under 150 words (strict limit).
+- Keep between 25-150 words (minimum 25 words, maximum 150 words).
 - Include ONE natural local SEO phrase at most once from: ${LOCAL_SEO_PHRASES.join(', ')}.
 - If rating <= 3 or sentiment is negative, invite them to contact the office (phone/email placeholder) and never argue.
 - If no comment text, write a short thank-you.
