@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GMB Review Response Agent - Admin Dashboard</title>
+    <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+      body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+      header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px 0;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      opacity: 0.9;
+    }
+
+    .tabs {
+        display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+        flex-wrap: wrap;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 10px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      border-bottom: none;
+    }
+
+    .tab:hover {
+      background: #f8f9fa;
+    }
+
+    .tab.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #333;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+        cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .btn-success {
+      background: #28a745;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+      resize: vertical;
+    }
+
+    .review-item {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+
+    .review-item:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .review-author {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .review-rating {
+      display: flex;
+      gap: 5px;
+    }
+
+    .star {
+      color: #ffc107;
+      font-size: 1.2rem;
+    }
+
+    .star.empty {
+      color: #e0e0e0;
+    }
+
+    .review-date {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .review-comment {
+      margin: 15px 0;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .review-analysis {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+        border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+        margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .badge-info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .badge-primary {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    .reply-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .reply-draft {
+      background: #e7f3ff;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .loading {
+        display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .stat-card p {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .filter-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .filter-row .form-group {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+
+    .keyword-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .keyword-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+    }
+
+    .keyword-item strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .keyword-item span {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .analysis-result {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .recommendation-item {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .recommendation-item.high {
+      border-left-color: #dc3545;
+    }
+
+    .recommendation-item.medium {
+      border-left-color: #ffc107;
+    }
+
+    .recommendation-item.low {
+      border-left-color: #28a745;
+    }
+
+    .recommendation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .recommendation-title {
+        font-weight: 600;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .action-items {
+      margin-top: 15px;
+      padding-left: 20px;
+    }
+
+    .action-items li {
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border-left: 4px solid;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      border-color: #28a745;
+      color: #155724;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      border-color: #dc3545;
+      color: #721c24;
+    }
+
+    .alert-info {
+      background: #d1ecf1;
+      border-color: #17a2b8;
+      color: #0c5460;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state svg {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    /* Notification/Toast System */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+    }
+
+    .notification {
+      background: white;
+      border-radius: 8px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideIn 0.3s ease-out;
+      border-left: 4px solid;
+      min-width: 300px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .notification.slide-out {
+      animation: slideOut 0.3s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        transform: translate(-50%, -60%);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+      }
+    }
+
+    @keyframes modalSlideOut {
+      from {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+      }
+      to {
+        transform: translate(-50%, -60%);
+        opacity: 0;
+      }
+    }
+
+    .notification-success {
+      border-left-color: #28a745;
+    }
+
+    .notification-error {
+      border-left-color: #dc3545;
+    }
+
+    .notification-info {
+      border-left-color: #17a2b8;
+    }
+
+    .notification-warning {
+      border-left-color: #ffc107;
+    }
+
+    .notification-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .notification-content {
+      flex: 1;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #333;
+    }
+
+    .notification-message {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #999;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .notification-close:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-sm {
+      font-size: 0.875rem;
+      padding: 6px 12px;
+      }
+    </style>
+  </head>
+  <body>
+  <!-- Notification Container -->
+  <div class="notification-container" id="notificationContainer"></div>
+    <header>
+    <div class="container">
+      <h1>🦷 GMB Review Response Agent</h1>
+      <p>Malama Dental - Admin Dashboard</p>
+    </div>
+    </header>
+
+  <div class="container">
+    <!-- Stats Overview -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <h3 id="totalReviews">-</h3>
+        <p>Total Reviews</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="averageRating">-</h3>
+        <p>Average Rating</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="replyRate">-</h3>
+        <p>Reply Rate</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="unrepliedCount">-</h3>
+        <p>Unreplied Reviews</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('reviews')">📝 Reviews</div>
+      <div class="tab" onclick="showTab('reply')">💬 Reply to Review</div>
+      <div class="tab" onclick="showTab('posts')">📄 GMB Posts</div>
+      <div class="tab" onclick="showTab('trends')">📊 Keyword Trends</div>
+      <div class="tab" onclick="showTab('analyzer')">🔍 Profile Analyzer</div>
+    </div>
+
+    <!-- Reviews Tab -->
+    <div id="reviews" class="tab-content active">
+      <h2 class="section-title">Review Analysis & Management</h2>
+      
+      <div class="filter-section">
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Filter by Status</label>
+            <select id="filterStatus" onchange="loadReviews()">
+              <option value="">All Status</option>
+          <option value="Needs Approval">Needs Approval</option>
+          <option value="Auto-Approved">Auto-Approved</option>
+              <option value="Replied">Replied</option>
+        </select>
+          </div>
+          <div class="form-group">
+            <label>Filter by Rating</label>
+            <select id="filterRating" onchange="loadReviews()">
+              <option value="">All Ratings</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+        </select>
+          </div>
+          <div class="form-group">
+            <label>Filter by Sentiment</label>
+            <select id="filterSentiment" onchange="loadReviews()">
+              <option value="">All Sentiments</option>
+          <option value="positive">Positive</option>
+          <option value="neutral">Neutral</option>
+          <option value="negative">Negative</option>
+        </select>
+          </div>
+          <div class="form-group">
+            <button class="btn" onclick="loadReviews()">🔄 Refresh</button>
+            <button class="btn btn-success" onclick="fetchNewReviews()">📥 Fetch New Reviews</button>
+            <button class="btn btn-secondary" onclick="analyzeAllUnreplied()">🤖 Analyze All Unreplied</button>
+            <button class="btn btn-secondary" onclick="autoReplyUnreplied()">⚡ Auto-Reply Approved</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="reviewsList"></div>
+    </div>
+
+    <!-- Reply Tab -->
+    <div id="reply" class="tab-content">
+      <h2 class="section-title">Reply to Specific Review</h2>
+      
+      <div class="card">
+        <div class="form-group">
+          <label>Search by Author Name</label>
+          <input type="text" id="searchAuthor" placeholder="Enter author name..." onkeyup="searchReview()">
+        </div>
+        <div id="searchResults"></div>
+      </div>
+
+      <div id="replyForm" style="display: none;">
+        <div class="card">
+          <h3>Review Details</h3>
+          <div id="reviewDetails"></div>
+        </div>
+
+        <div class="card">
+          <h3>AI Analysis</h3>
+          <div id="reviewAnalysis"></div>
+        </div>
+
+        <div class="card">
+          <h3>Reply Draft</h3>
+          <div class="form-group">
+            <textarea id="replyDraft" placeholder="Reply draft will appear here..."></textarea>
+          </div>
+          <button class="btn" onclick="generateReply()">🤖 Generate AI Reply</button>
+          <button class="btn btn-success" onclick="postReply()">📤 Post Reply</button>
+          <button class="btn btn-secondary" onclick="saveReply()">💾 Save Draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Posts Tab -->
+    <div id="posts" class="tab-content">
+      <h2 class="section-title">Google My Business Posts</h2>
+      
+      <div class="card">
+        <h3>Create New Post</h3>
+        <div class="form-group">
+          <label>Post Type</label>
+          <select id="postType">
+            <option value="STANDARD">Standard</option>
+            <option value="EVENT">Event</option>
+            <option value="OFFER">Offer</option>
+            <option value="ALERT">Alert</option>
+        </select>
+        </div>
+        <div class="form-group">
+          <label>Call-to-Action</label>
+          <select id="postCTA">
+            <option value="LEARN_MORE">Learn More</option>
+            <option value="CALL">Call</option>
+            <option value="BOOK">Book</option>
+            <option value="SHOP">Shop</option>
+            <option value="SIGN_UP">Sign Up</option>
+        </select>
+        </div>
+        <div class="form-group">
+          <label>Topic (Optional - leave empty to use weekly report keywords)</label>
+          <input type="text" id="postTopic" placeholder="e.g., Dental cleaning tips">
+        </div>
+        <button class="btn" onclick="generatePost()">🎨 Generate Post</button>
+        <button class="btn btn-secondary" onclick="listPosts()">📋 List Posts</button>
+    </div>
+
+      <div id="postPreview" style="display: none;">
+        <div class="card">
+          <h3>Post Preview</h3>
+          <div id="postContent"></div>
+          <div class="reply-draft" id="postImageInfo"></div>
+          <button class="btn btn-success" onclick="confirmPost()">✅ Post to GMB</button>
+          <button class="btn btn-secondary" onclick="cancelPost()">❌ Cancel</button>
+        </div>
+      </div>
+
+      <div id="postsList"></div>
+    </div>
+
+    <!-- Trends Tab -->
+    <div id="trends" class="tab-content">
+      <h2 class="section-title">Keyword Trends Analysis</h2>
+      
+      <div class="card">
+        <h3>Research Keywords for Location</h3>
+        <div class="form-group">
+          <label>Location (City, State)</label>
+          <input type="text" id="trendLocation" placeholder="e.g., Long Valley, NJ" value="Long Valley, NJ">
+        </div>
+        <div class="form-group">
+          <label>Radius (miles)</label>
+          <input type="number" id="trendRadius" value="10" min="1" max="50">
+        </div>
+        <button class="btn" onclick="researchKeywords()">🔍 Research Keywords</button>
+      </div>
+
+      <div class="card">
+        <h3>Weekly Keyword Report</h3>
+        <div class="form-group">
+          <label>Generate report for all locations or specific location</label>
+          <input type="text" id="reportLocation" placeholder="Leave empty for all locations">
+        </div>
+        <button class="btn" onclick="generateWeeklyReport()">📊 Generate Weekly Report</button>
+        <button class="btn btn-secondary" onclick="viewTrends()">📈 View Saved Trends</button>
+      </div>
+
+      <div id="trendsResults"></div>
+    </div>
+
+    <!-- Analyzer Tab -->
+    <div id="analyzer" class="tab-content">
+      <h2 class="section-title">GMB Profile Analyzer</h2>
+      
+      <div class="card">
+        <p>Analyze your Google My Business profile to get AI-powered recommendations for growth.</p>
+        <button class="btn" onclick="analyzeProfile()">🔍 Analyze Profile</button>
+      </div>
+
+      <div id="analysisResults"></div>
+      </div>
+    </div>
+
+    <script>
+    let currentReview = null;
+    let currentPost = null;
+
+    // Load stats on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      loadReviews();
+    });
+
+    // Notification System
+    function showNotification(type, title, message, duration = 5000) {
+      const container = document.getElementById('notificationContainer');
+      if (!container) return;
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      
+      const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+      };
+
+      notification.innerHTML = `
+        <div class="notification-icon">${icons[type] || 'ℹ️'}</div>
+        <div class="notification-content">
+          <div class="notification-title">${title}</div>
+          <div class="notification-message">${message}</div>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.classList.add('slide-out'); setTimeout(() => this.parentElement.remove(), 300)">×</button>
+      `;
+
+      container.appendChild(notification);
+
+      // Auto-dismiss after duration
+      if (duration > 0) {
+        setTimeout(() => {
+          notification.classList.add('slide-out');
+          setTimeout(() => notification.remove(), 300);
+        }, duration);
+      }
+
+      return notification;
+    }
+
+    // Helper functions for common notifications
+    function showSuccess(message, title = 'Success') {
+      showNotification('success', title, message);
+    }
+
+    function showError(message, title = 'Error') {
+      showNotification('error', title, message, 7000); // Errors stay longer
+    }
+
+    function showInfo(message, title = 'Info') {
+      showNotification('info', title, message);
+    }
+
+    function showWarning(message, title = 'Warning') {
+      showNotification('warning', title, message);
+    }
+
+    function showTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+
+      // Load data for specific tabs
+      if (tabName === 'trends') {
+        viewTrends();
+      } else if (tabName === 'posts') {
+        listPosts();
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const reviews = await fetch('/api/reviews').then(r => r.json());
+        const total = reviews.length;
+        const average = reviews.reduce((sum, r) => sum + r.rating, 0) / total || 0;
+        
+        // Check both repliedAt AND status to determine if replied
+        // A review is replied if: (repliedAt is set) OR (status === 'Replied')
+        const replied = reviews.filter(r => {
+          // Normalize - if repliedAt exists or status is Replied, it's replied
+          return r.repliedAt || r.status === 'Replied';
+        }).length;
+        
+        // Unreplied = not replied AND not in "Needs Approval" status (those need manual review)
+        // Unreplied means: no repliedAt AND status is not 'Replied' AND status is not 'Needs Approval'
+        const unreplied = reviews.filter(r => {
+          const isReplied = r.repliedAt || r.status === 'Replied';
+          const needsApproval = r.status === 'Needs Approval';
+          return !isReplied && !needsApproval;
+        }).length;
+
+        document.getElementById('totalReviews').textContent = total;
+        document.getElementById('averageRating').textContent = average.toFixed(1) + '/5';
+        document.getElementById('replyRate').textContent = total > 0 ? ((replied / total) * 100).toFixed(0) + '%' : '0%';
+        document.getElementById('unrepliedCount').textContent = unreplied;
+        
+        // Debug log to verify calculation
+        console.log('Stats loaded:', { total, replied, unreplied, average: average.toFixed(1) });
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    async function loadReviews() {
+      const status = document.getElementById('filterStatus')?.value || '';
+      const rating = document.getElementById('filterRating')?.value || '';
+      const sentiment = document.getElementById('filterSentiment')?.value || '';
+
+      try {
+        let url = '/api/reviews?';
+        const params = new URLSearchParams();
+        if (status) params.append('status', status);
+        if (rating) params.append('rating', rating);
+        if (sentiment) params.append('sentiment', sentiment);
+        url += params.toString();
+
+        const reviews = await fetch(url).then(r => r.json());
+        const listEl = document.getElementById('reviewsList');
+
+        if (reviews.length === 0) {
+          listEl.innerHTML = '<div class="empty-state"><p>No reviews found</p></div>';
+          return;
+        }
+
+        listEl.innerHTML = reviews.map(review => `
+          <div class="review-item">
+            <div class="review-header">
+              <div>
+                <span class="review-author">${review.authorName}</span>
+                <span class="review-date"> - ${new Date(review.createTime).toLocaleDateString()}</span>
+              </div>
+              <div class="review-rating">
+                ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+              </div>
+            </div>
+            ${review.comment ? `<div class="review-comment">${review.comment}</div>` : '<div class="review-comment"><em>No comment</em></div>'}
+            <div class="review-analysis">
+              <div style="margin-bottom: 10px;">
+                <span class="badge badge-${review.sentiment === 'positive' ? 'success' : review.sentiment === 'negative' ? 'danger' : 'warning'}">${review.sentiment || 'Not analyzed'}</span>
+                <span class="badge badge-info">${review.urgency || 'N/A'} urgency</span>
+                <span class="badge badge-${review.status === 'Replied' ? 'success' : review.status === 'Auto-Approved' ? 'primary' : review.status === 'Needs Approval' ? 'warning' : 'danger'}">${review.status}</span>
+                ${review.repliedAt ? `<span class="badge badge-success">Replied ${new Date(review.repliedAt).toLocaleDateString()}</span>` : ''}
+              </div>
+              ${review.replyDraft ? `
+                <div class="reply-section">
+                  <strong>Reply Draft:</strong>
+                  <div class="reply-draft" id="draft-${review.id}">${review.replyDraft}</div>
+                  ${!review.repliedAt ? `
+                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                      <button class="btn" onclick="editReply(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">✏️ Edit Reply</button>
+                      <button class="btn btn-secondary" onclick="regenerateReplyForReview(${review.id}, event)" style="font-size: 0.9rem; padding: 8px 16px;" id="regenerateBtn-${review.id}">🔄 Regenerate Reply</button>
+                      ${review.status === 'Auto-Approved' ? `
+                        <button class="btn btn-success" onclick="postReplyById(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">📤 Post Reply</button>
+                      ` : review.status === 'Needs Approval' ? `
+                        <button class="btn btn-warning" onclick="approveAndPost(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">✅ Approve & Post</button>
+                      ` : `
+                        <button class="btn btn-success" onclick="postReplyById(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">📤 Post Reply</button>
+                      `}
+                    </div>
+                  ` : ''}
+                </div>
+              ` : !review.repliedAt ? `
+                <div class="reply-section">
+                  <button class="btn" onclick="generateReplyForReview(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">🤖 Generate Reply</button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('reviewsList').innerHTML = `<div class="alert alert-error">Error loading reviews: ${error.message}</div>`;
+      }
+    }
+
+    async function fetchNewReviews() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Fetching...';
+
+      try {
+        const response = await fetch('/api/reviews/fetch', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+          showSuccess(`Fetched ${data.count || 0} new reviews!`, 'Reviews Updated');
+          loadReviews();
+          loadStats();
+        } else {
+          showError(data.error || 'Failed to fetch reviews', 'Fetch Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Fetch Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '📥 Fetch New Reviews';
+      }
+    }
+
+    async function analyzeAllUnreplied() {
+      if (!confirm('This will analyze all unreplied reviews and generate reply drafts. This may take a few minutes. Continue?')) {
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Analyzing...';
+
+      try {
+        const response = await fetch('/api/reviews/analyze-all-unreplied', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+          const message = `Analyzed ${data.analyzedCount || 0} reviews.\n\nGenerated ${data.generatedCount || 0} reply drafts.\nSkipped ${data.skippedCount || 0} (already analyzed).\n\nPlease review and approve replies before posting.`;
+          showSuccess(message, 'Analysis Complete');
+          loadReviews();
+          loadStats();
+        } else {
+          showError(data.error || 'Failed to analyze reviews', 'Analysis Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Analysis Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🤖 Analyze All Unreplied';
+      }
+    }
+
+    async function autoReplyUnreplied() {
+      if (!confirm('This will automatically post replies to all Auto-Approved reviews from the last 6 months. Continue?')) {
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Processing...';
+
+      try {
+        const response = await fetch('/api/reviews/auto-reply-unreplied', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+          const message = `Replied to ${data.successCount || 0} reviews.\nSkipped: ${data.skippedCount || 0} (already replied or needs approval)`;
+          showSuccess(message, 'Auto-Reply Complete');
+          loadReviews();
+          loadStats();
+        } else {
+          showError(data.error || 'Failed to auto-reply', 'Auto-Reply Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Auto-Reply Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Auto-Reply Approved';
+      }
+    }
+
+    async function searchReview() {
+      const author = document.getElementById('searchAuthor').value.trim();
+      if (author.length < 2) {
+        document.getElementById('searchResults').innerHTML = '';
+        return;
+      }
+
+      try {
+        const reviews = await fetch('/api/reviews').then(r => r.json());
+        const matches = reviews.filter(r => 
+          r.authorName.toLowerCase().includes(author.toLowerCase())
+        ).slice(0, 5);
+
+        const resultsEl = document.getElementById('searchResults');
+        if (matches.length === 0) {
+          resultsEl.innerHTML = '<p>No reviews found</p>';
+          return;
+        }
+
+        resultsEl.innerHTML = matches.map(review => `
+          <div class="review-item" onclick="selectReview(${review.id})">
+            <strong>${review.authorName}</strong> - ${review.rating}⭐ (${new Date(review.createTime).toLocaleDateString()})
+            ${review.comment ? `<div style="margin-top: 10px; color: #666;">${review.comment.substring(0, 100)}...</div>` : ''}
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('searchResults').innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+      }
+    }
+
+    async function selectReview(reviewId) {
+      try {
+        const review = await fetch(`/api/reviews/${reviewId}`).then(r => r.json());
+        currentReview = review;
+
+        document.getElementById('reviewDetails').innerHTML = `
+          <strong>Author:</strong> ${review.authorName}<br>
+          <strong>Rating:</strong> ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}<br>
+          <strong>Date:</strong> ${new Date(review.createTime).toLocaleDateString()}<br>
+          <strong>Comment:</strong> ${review.comment || '<em>No comment</em>'}
+        `;
+
+        const analysis = {
+          sentiment: review.sentiment || 'Not analyzed',
+          urgency: review.urgency || 'N/A',
+          topics: review.topics || [],
+          riskFlags: review.riskFlags || [],
+        };
+
+        document.getElementById('reviewAnalysis').innerHTML = `
+          <div>
+            <span class="badge badge-${analysis.sentiment === 'positive' ? 'success' : analysis.sentiment === 'negative' ? 'danger' : 'warning'}">${analysis.sentiment}</span>
+            <span class="badge badge-info">${analysis.urgency} urgency</span>
+          </div>
+          ${analysis.topics.length > 0 ? `<div style="margin-top: 10px;"><strong>Topics:</strong> ${analysis.topics.join(', ')}</div>` : ''}
+          ${analysis.riskFlags.length > 0 ? `<div style="margin-top: 10px;"><strong>Risk Flags:</strong> ${analysis.riskFlags.join(', ')}</div>` : ''}
+        `;
+
+        document.getElementById('replyDraft').value = review.replyDraft || '';
+        document.getElementById('replyForm').style.display = 'block';
+      } catch (error) {
+        showError(`Error loading review: ${error.message}`, 'Error');
+      }
+    }
+
+    async function generateReply() {
+      if (!currentReview) {
+        showWarning('Please select a review first', 'No Review Selected');
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Generating...';
+
+      try {
+        const response = await fetch(`/api/reviews/${currentReview.id}/analyze`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+          document.getElementById('replyDraft').value = data.replyDraft || '';
+          currentReview = { ...currentReview, ...data };
+          selectReview(currentReview.id); // Refresh display
+          showSuccess('Reply generated successfully!', 'Reply Generated');
+        } else {
+          showError(data.error || 'Failed to generate reply', 'Generation Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Generation Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🤖 Generate AI Reply';
+      }
+    }
+
+    async function saveReply() {
+      if (!currentReview) {
+        showWarning('Please select a review first', 'No Review Selected');
+        return;
+      }
+
+      const replyDraft = document.getElementById('replyDraft').value;
+      
+      try {
+        const response = await fetch(`/api/reviews/${currentReview.id}/reply`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ replyDraft }),
+        });
+
+        if (response.ok) {
+          showSuccess('Reply draft saved!', 'Saved');
+          loadReviews();
+        } else {
+          const data = await response.json();
+          showError(data.error || 'Failed to save reply', 'Save Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Save Error');
+      }
+    }
+
+    async function postReply() {
+      if (!currentReview) {
+        showWarning('Please select a review first', 'No Review Selected');
+        return;
+      }
+
+      const replyDraft = document.getElementById('replyDraft').value;
+      if (!replyDraft.trim()) {
+        showWarning('Please enter a reply draft first', 'No Reply Draft');
+        return;
+      }
+
+      if (!confirm(`Post this reply to ${currentReview.authorName}'s review?`)) {
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Posting...';
+
+      try {
+        const response = await fetch(`/api/reviews/${currentReview.id}/post-reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ replyText: replyDraft }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showSuccess('Reply posted successfully!', 'Posted');
+          loadReviews();
+          loadStats();
+          document.getElementById('replyForm').style.display = 'none';
+          document.getElementById('searchAuthor').value = '';
+        } else {
+          showError(data.error || 'Failed to post reply', 'Post Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Post Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '📤 Post Reply';
+      }
+    }
+
+    async function postReplyById(reviewId) {
+      const review = await fetch(`/api/reviews/${reviewId}`).then(r => r.json());
+      
+      if (!review.replyDraft) {
+        showWarning('No reply draft found. Please generate a reply first.', 'No Draft');
+        return;
+      }
+
+      if (!confirm(`Post this reply to ${review.authorName}'s review?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/reviews/${reviewId}/post-reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ replyText: review.replyDraft }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showSuccess('Reply posted successfully!', 'Posted');
+          loadReviews();
+          loadStats();
+        } else {
+          showError(data.error || 'Failed to post reply', 'Post Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Post Error');
+      }
+    }
+
+    async function generateReplyForReview(reviewId) {
+      const reviewItem = document.getElementById(`review-${reviewId}`);
+      if (!reviewItem) return;
+
+      const btn = event.target;
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Generating...';
+
+      try {
+        const response = await fetch(`/api/reviews/${reviewId}/analyze`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Reload reviews to show the new reply draft
+          loadReviews();
+          showSuccess('Reply draft generated! Please review and edit if needed before posting.', 'Reply Generated');
+        } else {
+          showError(data.error || 'Failed to generate reply', 'Generation Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Generation Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    async function regenerateReplyForReview(reviewId, clickEvent) {
+      console.log('Regenerate clicked for review:', reviewId);
+      
+      // Find button - try multiple ways in case ID isn't set yet
+      let btn = document.getElementById(`regenerateBtn-${reviewId}`);
+      if (!btn && clickEvent && clickEvent.target) {
+        // Try finding by event target
+        btn = clickEvent.target.closest('button');
+      }
+      if (!btn) {
+        showError('Could not find regenerate button', 'Error');
+        console.error('Button not found for reviewId:', reviewId);
+        return;
+      }
+
+      // Confirm regeneration
+      if (!confirm('Regenerate the reply draft? This will replace the current draft with a new AI-generated reply.')) {
+        return;
+      }
+
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Regenerating...';
+
+      // Show loading state on the draft text
+      const draftEl = document.getElementById(`draft-${reviewId}`);
+      const originalDraftText = draftEl ? draftEl.textContent : '';
+      if (draftEl) {
+        draftEl.innerHTML = '<em style="color: #999;">Regenerating reply...</em>';
+      }
+
+      try {
+        console.log(`Calling /api/reviews/${reviewId}/analyze`);
+        const response = await fetch(`/api/reviews/${reviewId}/analyze`, { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        const data = await response.json();
+        console.log('Response:', response.ok, data);
+        
+        if (response.ok && data.replyDraft) {
+          // Update the draft display immediately
+          if (draftEl) {
+            draftEl.textContent = data.replyDraft;
+          }
+
+          // Reload reviews to get updated status and analysis
+          await loadReviews();
+          showSuccess('Reply draft regenerated! Please review the new draft.', 'Reply Regenerated');
+        } else {
+          // Restore original draft on error
+          if (draftEl && originalDraftText) {
+            draftEl.textContent = originalDraftText;
+          }
+          showError(data.error || 'Failed to regenerate reply', 'Regeneration Error');
+        }
+      } catch (error) {
+        console.error('Regenerate error:', error);
+        // Restore original draft on error
+        if (draftEl && originalDraftText) {
+          draftEl.textContent = originalDraftText;
+        }
+        showError(error.message || 'Failed to regenerate reply', 'Regeneration Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    async function editReply(reviewId) {
+      // Close any existing edit modal first
+      closeEditModal();
+
+      // Get current review to fetch the draft
+      const review = await fetch(`/api/reviews/${reviewId}`).then(r => r.json());
+      const currentDraft = review.replyDraft || '';
+      
+      // Create backdrop/overlay
+      const backdrop = document.createElement('div');
+      backdrop.id = 'editModalBackdrop';
+      backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; animation: fadeIn 0.2s ease-out;';
+      
+      // Create modal container
+      const editDiv = document.createElement('div');
+      editDiv.id = 'editModalContainer';
+      editDiv.setAttribute('data-review-id', reviewId);
+      editDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10000; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; animation: modalSlideIn 0.3s ease-out;';
+      editDiv.innerHTML = `
+        <h3 style="margin-bottom: 15px; margin-top: 0;">Edit Reply Draft</h3>
+        <textarea id="editReplyText" style="width: 100%; min-height: 150px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-family: inherit; font-size: 1rem; resize: vertical;" placeholder="Enter reply text...">${currentDraft.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+        <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn btn-secondary" id="cancelEditBtn" type="button">Cancel</button>
+          <button class="btn btn-success" id="saveEditBtn" type="button">💾 Save Changes</button>
+        </div>
+      `;
+      
+      // Add event listeners
+      const cancelBtn = editDiv.querySelector('#cancelEditBtn');
+      const saveBtn = editDiv.querySelector('#saveEditBtn');
+      
+      cancelBtn.addEventListener('click', () => closeEditModal());
+      saveBtn.addEventListener('click', () => saveEditedReply(reviewId));
+      
+      // Close on backdrop click
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) {
+          closeEditModal();
+        }
+      });
+      
+      // Close on Escape key
+      const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+          closeEditModal();
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      };
+      document.addEventListener('keydown', escapeHandler);
+      
+      // Append to body
+      document.body.appendChild(backdrop);
+      document.body.appendChild(editDiv);
+      
+      // Focus the textarea
+      setTimeout(() => {
+        const textarea = document.getElementById('editReplyText');
+        if (textarea) {
+          textarea.focus();
+          textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+      }, 100);
+    }
+
+    function closeEditModal() {
+      const backdrop = document.getElementById('editModalBackdrop');
+      const modal = document.getElementById('editModalContainer');
+      
+      if (backdrop) {
+        backdrop.style.animation = 'fadeOut 0.2s ease-out forwards';
+        setTimeout(() => backdrop.remove(), 200);
+      }
+      
+      if (modal) {
+        modal.style.animation = 'modalSlideOut 0.2s ease-out forwards';
+        setTimeout(() => modal.remove(), 200);
+      }
+    }
+
+    async function saveEditedReply(reviewId) {
+      // Get reviewId from modal if not provided
+      if (!reviewId) {
+        const modal = document.getElementById('editModalContainer');
+        reviewId = modal ? modal.getAttribute('data-review-id') : null;
+      }
+      
+      const textarea = document.getElementById('editReplyText');
+      if (!textarea || !reviewId) {
+        closeEditModal();
+        return;
+      }
+
+      const newDraft = textarea.value.trim();
+      if (newDraft === '') {
+        showWarning('Reply cannot be empty', 'Validation Error');
+        return;
+      }
+
+      // Disable buttons during save
+      const saveBtn = document.getElementById('saveEditBtn');
+      const cancelBtn = document.getElementById('cancelEditBtn');
+      if (saveBtn) saveBtn.disabled = true;
+      if (cancelBtn) cancelBtn.disabled = true;
+      if (saveBtn) saveBtn.innerHTML = '<span class="loading"></span> Saving...';
+
+      try {
+        const response = await fetch(`/api/reviews/${reviewId}/reply`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ replyDraft: newDraft }),
+        });
+
+        if (response.ok) {
+          // Close the modal
+          closeEditModal();
+          
+          // Update the display
+          const draftEl = document.getElementById(`draft-${reviewId}`);
+          if (draftEl) {
+            draftEl.textContent = newDraft;
+          }
+          
+          // Reload to ensure consistency
+          loadReviews();
+          showSuccess('Reply draft updated!', 'Updated');
+        } else {
+          const data = await response.json();
+          showError(data.error || 'Failed to update reply', 'Update Error');
+          // Re-enable buttons on error
+          if (saveBtn) saveBtn.disabled = false;
+          if (cancelBtn) cancelBtn.disabled = false;
+          if (saveBtn) saveBtn.innerHTML = '💾 Save Changes';
+        }
+      } catch (error) {
+        showError(error.message, 'Update Error');
+        // Re-enable buttons on error
+        if (saveBtn) saveBtn.disabled = false;
+        if (cancelBtn) cancelBtn.disabled = false;
+        if (saveBtn) saveBtn.innerHTML = '💾 Save Changes';
+      }
+    }
+
+    async function approveAndPost(reviewId) {
+      if (!confirm('Approve this reply and post it to Google Business Profile?')) {
+        return;
+      }
+
+      try {
+        // First, update status to Auto-Approved
+        await fetch(`/api/reviews/${reviewId}/reply`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Auto-Approved' }),
+        });
+
+        // Then post the reply
+        const review = await fetch(`/api/reviews/${reviewId}`).then(r => r.json());
+        if (!review.replyDraft) {
+          showWarning('No reply draft found', 'No Draft');
+          return;
+        }
+
+        const response = await fetch(`/api/reviews/${reviewId}/post-reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ replyText: review.replyDraft }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showSuccess('Reply approved and posted successfully!', 'Approved & Posted');
+          loadReviews();
+          loadStats();
+        } else {
+          showError(data.error || 'Failed to post reply', 'Post Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Post Error');
+      }
+    }
+
+    async function generatePost() {
+      const topic = document.getElementById('postTopic').value.trim();
+      const postType = document.getElementById('postType').value;
+      const callToAction = document.getElementById('postCTA').value;
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Generating...';
+
+      try {
+        const params = new URLSearchParams();
+        if (topic) params.append('topic', topic);
+        params.append('postType', postType);
+        params.append('callToAction', callToAction);
+
+        const response = await fetch(`/api/posts/generate?${params.toString()}`, { method: 'POST' });
+        const data = await response.json();
+
+        if (response.ok) {
+          currentPost = data;
+          document.getElementById('postContent').innerHTML = `
+            <div style="margin-bottom: 15px;">
+              <strong>Post Type:</strong> ${data.topicType}<br>
+              <strong>Call-to-Action:</strong> ${data.callToAction?.actionType || 'None'}
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; white-space: pre-wrap;">${data.summary}</div>
+            <div style="margin-top: 15px; color: #666;">
+              Word Count: ${data.summary.split(/\s+/).length} words
+            </div>
+          `;
+
+          if (data.imagePath) {
+            document.getElementById('postImageInfo').innerHTML = `
+              ✅ Image generated: ${data.imagePath.split('/').pop()}
+              <br><small>Note: Image will be uploaded to cloud storage before posting</small>
+            `;
+          }
+
+          document.getElementById('postPreview').style.display = 'block';
+        } else {
+          showError(data.error || 'Failed to generate post', 'Post Generation Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Post Generation Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🎨 Generate Post';
+      }
+    }
+
+    async function confirmPost() {
+      if (!currentPost) return;
+
+      if (!confirm('Post this to Google My Business Profile?')) {
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Posting...';
+
+      try {
+        const response = await fetch('/api/posts/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            summary: currentPost.summary,
+            postType: currentPost.topicType,
+            callToAction: currentPost.callToAction,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showSuccess('Post created successfully!', 'Posted to GMB');
+          document.getElementById('postPreview').style.display = 'none';
+          currentPost = null;
+          listPosts();
+        } else {
+          showError(data.error || 'Failed to post', 'Post Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Post Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✅ Post to GMB';
+      }
+    }
+
+    function cancelPost() {
+      document.getElementById('postPreview').style.display = 'none';
+      currentPost = null;
+    }
+
+    async function listPosts() {
+      try {
+        const response = await fetch('/api/posts');
+        const posts = await response.json();
+
+        const listEl = document.getElementById('postsList');
+        if (!posts || posts.length === 0) {
+          listEl.innerHTML = '<div class="empty-state"><p>No posts found</p></div>';
+          return;
+        }
+
+        listEl.innerHTML = `
+          <h3 style="margin-bottom: 20px;">Recent Posts (${posts.length})</h3>
+          ${posts.map(post => `
+            <div class="card">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <strong>${post.state || 'Unknown'}</strong>
+                <span style="color: #666;">${new Date(post.createTime || post.updateTime).toLocaleDateString()}</span>
+              </div>
+              <div style="color: #555;">${post.summary || 'No summary'}</div>
+            </div>
+          `).join('')}
+        `;
+      } catch (error) {
+        document.getElementById('postsList').innerHTML = `<div class="alert alert-error">Error loading posts: ${error.message}</div>`;
+      }
+    }
+
+    async function researchKeywords() {
+      const location = document.getElementById('trendLocation').value.trim();
+      const radius = parseInt(document.getElementById('trendRadius').value) || 10;
+
+      if (!location) {
+        showWarning('Please enter a location', 'Location Required');
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Researching...';
+
+      try {
+        const response = await fetch('/api/keywords/research', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ location, radius }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById('trendsResults').innerHTML = `
+            <div class="alert alert-success">
+              ✅ Keyword research complete! Found ${data.keywordsCount || 0} keywords.
+            </div>
+            <div class="card">
+              <h3>Top Keywords</h3>
+              <div class="keyword-list">
+                ${(data.topKeywords || []).map(kw => `
+                  <div class="keyword-item">
+                    <strong>${kw.keyword || kw}</strong>
+                    ${kw.volume ? `<span>Volume: ${kw.volume}</span>` : ''}
+                    ${kw.trend ? `<span>Trend: ${kw.trend}</span>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else {
+          showError(data.error || 'Failed to research keywords', 'Keyword Research Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Keyword Research Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Research Keywords';
+      }
+    }
+
+    async function generateWeeklyReport() {
+      const location = document.getElementById('reportLocation').value.trim();
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Generating...';
+
+      try {
+        const response = await fetch('/api/keywords/weekly-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ location: location || null }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showSuccess('Weekly report generated successfully!', 'Report Generated');
+          viewTrends();
+        } else {
+          showError(data.error || 'Failed to generate report', 'Report Generation Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Report Generation Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '📊 Generate Weekly Report';
+      }
+    }
+
+    async function viewTrends() {
+      try {
+        const response = await fetch('/api/keywords/trends');
+        const data = await response.json();
+
+        const resultsEl = document.getElementById('trendsResults');
+        if (!data || !data.topKeywords) {
+          resultsEl.innerHTML = '<div class="alert alert-info">No trends available. Generate a weekly report first.</div>';
+          return;
+        }
+
+        resultsEl.innerHTML = `
+          <div class="card">
+            <h3>Latest Weekly Report</h3>
+            <p><strong>Date:</strong> ${new Date(data.reportDate).toLocaleDateString()}</p>
+            <p><strong>Location:</strong> ${data.location || 'All Locations'}</p>
+          </div>
+          <div class="card">
+            <h3>Top Keywords</h3>
+            <div class="keyword-list">
+              ${JSON.parse(data.topKeywords || '[]').slice(0, 20).map((kw, i) => `
+                <div class="keyword-item">
+                  <strong>#${i + 1} ${typeof kw === 'string' ? kw : kw.keyword || kw}</strong>
+                  ${typeof kw === 'object' && kw.volume ? `<span>Volume: ${kw.volume}</span>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          ${data.trendingUp ? `
+            <div class="card">
+              <h3>Trending Up</h3>
+              <div class="keyword-list">
+                ${JSON.parse(data.trendingUp).slice(0, 10).map((kw, i) => `
+                  <div class="keyword-item">
+                    <strong>${typeof kw === 'string' ? kw : kw.keyword || kw}</strong>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+          ${data.summary ? `
+            <div class="card">
+              <h3>AI Summary</h3>
+              <div style="white-space: pre-wrap; color: #555;">${data.summary}</div>
+            </div>
+          ` : ''}
+        `;
+      } catch (error) {
+        document.getElementById('trendsResults').innerHTML = `<div class="alert alert-error">Error loading trends: ${error.message}</div>`;
+      }
+    }
+
+    async function analyzeProfile() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Analyzing...';
+
+      try {
+        const response = await fetch('/api/analysis/profile');
+        const analysis = await response.json();
+
+        if (response.ok) {
+          const resultsEl = document.getElementById('analysisResults');
+          resultsEl.innerHTML = `
+            <div class="analysis-result">
+              <div class="score-circle">${analysis.overallScore}/100</div>
+              <h2 style="text-align: center; margin-bottom: 30px;">Overall Profile Score</h2>
+
+              <div class="card">
+                <h3>✅ Strengths</h3>
+                <ul>
+                  ${analysis.strengths.map(s => `<li>${s}</li>`).join('')}
+                </ul>
+              </div>
+
+              <div class="card">
+                <h3>⚠️ Weaknesses</h3>
+                <ul>
+                  ${analysis.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                </ul>
+              </div>
+
+              <div class="card">
+                <h3>💡 Recommendations</h3>
+                ${Array.isArray(analysis.recommendations?.highPriority) ? `
+                  <div style="margin-bottom: 20px;">
+                    <h4 style="color: #dc3545; margin-bottom: 10px;">🔴 High Priority</h4>
+                    ${analysis.recommendations.highPriority.map(rec => `<div class="recommendation-item high"><p>${rec}</p></div>`).join('')}
+                  </div>
+                ` : ''}
+                ${Array.isArray(analysis.recommendations?.mediumPriority) ? `
+                  <div style="margin-bottom: 20px;">
+                    <h4 style="color: #ffc107; margin-bottom: 10px;">🟡 Medium Priority</h4>
+                    ${analysis.recommendations.mediumPriority.map(rec => `<div class="recommendation-item medium"><p>${rec}</p></div>`).join('')}
+                  </div>
+                ` : ''}
+                ${Array.isArray(analysis.recommendations?.lowPriority) ? `
+                  <div style="margin-bottom: 20px;">
+                    <h4 style="color: #28a745; margin-bottom: 10px;">🟢 Low Priority</h4>
+                    ${analysis.recommendations.lowPriority.map(rec => `<div class="recommendation-item low"><p>${rec}</p></div>`).join('')}
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="card">
+                <h3>📈 Trend Analysis</h3>
+                <div style="white-space: pre-wrap; color: #555;">${analysis.trendAnalysis}</div>
+              </div>
+
+              <div class="card">
+                <h3>🚀 Growth Opportunities</h3>
+                <ul>
+                  ${analysis.growthOpportunities.map(opp => `<li>${opp}</li>`).join('')}
+                </ul>
+              </div>
+
+              <div class="card">
+                <h3>📋 Executive Summary</h3>
+                <div style="white-space: pre-wrap; color: #555;">${analysis.executiveSummary || analysis.summary || 'No summary available'}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          showError(analysis.error || 'Failed to analyze profile', 'Analysis Error');
+        }
+      } catch (error) {
+        showError(error.message, 'Analysis Error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Analyze Profile';
+      }
+    }
+    </script>
+  </body>
+</html>

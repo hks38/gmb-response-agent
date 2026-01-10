@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Review {
+  id               Int      @id @default(autoincrement())
+  reviewId         String   @unique
+  authorName       String
+  rating           Int
+  comment          String?
+  createTime       DateTime
+  updateTime       DateTime
+  sentiment        String?
+  urgency          String?
+  topics           String? // JSON array stored as string
+  suggestedActions String? // JSON array stored as string
+  riskFlags        String? // JSON array stored as string
+  replyDraft       String?
+  status           String   @default("Needs Approval")
+  lastAnalyzedAt   DateTime?
+  repliedAt        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model KeywordTrend {
+  id                Int      @id @default(autoincrement())
+  keyword           String
+  location          String   // e.g., "Long Valley, NJ" or coordinates
+  latitude          Float?
+  longitude         Float?
+  radius            Int      @default(10) // radius in miles
+  searchVolume      Int?     // Estimated search volume (0-100 scale for Google Trends)
+  trendScore        Float?   // Calculated trend score (change over time)
+  weekOf            DateTime // Week start date (Monday)
+  previousWeekScore Float?   // Previous week's score for comparison
+  category          String?  // e.g., "general", "cosmetic", "emergency", "pediatric"
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([keyword, location, weekOf])
+  @@index([weekOf])
+  @@index([keyword])
+  @@index([location])
+}
+
+model KeywordWeeklyReport {
+  id                Int      @id @default(autoincrement())
+  reportDate        DateTime @default(now())
+  location          String
+  latitude          Float?
+  longitude         Float?
+  radius            Int      @default(10)
+  totalKeywords     Int
+  topKeywords       String   // JSON array of top keywords
+  trendingUp        String?  // JSON array of keywords trending up
+  trendingDown      String?  // JSON array of keywords trending down
+  summary           String?  // AI-generated summary
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([reportDate])
+  @@index([location])
+}
+
