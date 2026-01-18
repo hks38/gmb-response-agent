@@ -16,11 +16,11 @@ interface FetchResult {
   nextPageToken?: string;
 }
 
-const buildClient = async () => {
+const buildClient = async (auth?: { businessId?: string; locationIdInternal?: string }) => {
   // Try to get access token using refresh token flow first
   let token: string | undefined;
   try {
-    token = await getAccessToken();
+    token = await getAccessToken(auth);
   } catch (error) {
     // Fall back to GOOGLE_ACCESS_TOKEN if refresh token flow not set up
     token = process.env.GOOGLE_ACCESS_TOKEN;
@@ -72,8 +72,11 @@ const getAccountId = async (client: any): Promise<string> => {
 export const fetchGoogleReviews = async (opts: {
   locationId: string;
   sinceUpdateTime?: string;
+  accountId?: string;
+  businessId?: string;
+  locationIdInternal?: string;
 }): Promise<GoogleReview[]> => {
-  const client = await buildClient();
+  const client = await buildClient({ businessId: opts.businessId, locationIdInternal: opts.locationIdInternal });
   
   // Extract numeric location ID (remove "locations/" prefix if present)
   let numericLocationId = opts.locationId;
@@ -86,8 +89,8 @@ export const fetchGoogleReviews = async (opts: {
     numericLocationId = parts[parts.length - 1];
   }
 
-  // Get account ID - check env first, then discover
-  let accountId: string | undefined = process.env.GOOGLE_ACCOUNT_ID;
+  // Get account ID - prefer explicit override, then env, then discover
+  let accountId: string | undefined = opts.accountId || process.env.GOOGLE_ACCOUNT_ID;
   
   if (accountId) {
     // Remove "accounts/" prefix if present

@@ -10,6 +10,7 @@ export interface PostGenerationOptions {
   useWeeklyReport?: boolean; // If true, uses weekly report data
   location?: string; // Specific location to target
   maxPosts?: number; // Maximum number of posts to generate (default: 1)
+  businessId?: string;
 }
 
 export interface PostGenerationResult {
@@ -34,11 +35,12 @@ export const generateSmartPost = async (
     useWeeklyReport = true,
     location,
     maxPosts = 1,
+    businessId,
   } = options;
 
   // Try to get weekly report if enabled
   if (useWeeklyReport) {
-    const report = await getLatestWeeklyReport(location);
+    const report = await getLatestWeeklyReport({ location, businessId });
     
     if (report) {
       console.log(`📊 Using weekly keyword report from ${report.reportDate.toISOString().split('T')[0]}`);
@@ -63,6 +65,7 @@ export const generateSmartPost = async (
     postType,
     callToAction,
     ctaUrl: ctaUrl || businessConfig.websiteUrl,
+    businessId,
   });
 
   return {
@@ -74,11 +77,14 @@ export const generateSmartPost = async (
 /**
  * Get the latest weekly keyword report
  */
-const getLatestWeeklyReport = async (location?: string) => {
+const getLatestWeeklyReport = async (opts?: { location?: string; businessId?: string }) => {
+  const location = opts?.location;
+  const businessId = opts?.businessId;
   // First try consolidated report if no specific location
   if (!location) {
     const consolidatedReport = await prisma.keywordWeeklyReport.findFirst({
       where: {
+        ...(businessId ? { businessId } : {}),
         location: { contains: 'All Locations' },
       },
       orderBy: { reportDate: 'desc' },
@@ -94,6 +100,9 @@ const getLatestWeeklyReport = async (location?: string) => {
   if (location) {
     where.location = location;
   }
+  if (businessId) {
+    where.businessId = businessId;
+  }
 
   const report = await prisma.keywordWeeklyReport.findFirst({
     where,
@@ -103,6 +112,7 @@ const getLatestWeeklyReport = async (location?: string) => {
   // If still no report found, try getting the most recent report regardless of location
   if (!report) {
     const anyReport = await prisma.keywordWeeklyReport.findFirst({
+      ...(businessId ? { where: { businessId } } : {}),
       orderBy: { reportDate: 'desc' },
     });
     return anyReport;

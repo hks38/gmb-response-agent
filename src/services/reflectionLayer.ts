@@ -1,4 +1,5 @@
 import { llmService } from './llmService';
+import { getBusinessConfig } from './businessConfig';
 
 export interface ContentToVerify {
   content: string;
@@ -27,6 +28,9 @@ export const verifyAndCorrectContent = async (
   contentToVerify: ContentToVerify
 ): Promise<VerificationResult> => {
   const { content, task, keywords, maxWords, minWords, originalPrompt } = contentToVerify;
+
+  const businessConfig = await getBusinessConfig();
+  const businessName = businessConfig.name || 'Malama Dental';
 
   // Quick checks
   const wordCount = content.split(/\s+/).filter((w: string) => w.length > 0).length;
@@ -64,9 +68,9 @@ export const verifyAndCorrectContent = async (
     issues.push(`Word count (${wordCount}) is below minimum (${minWords})`);
   }
 
-  // Additional verification: ensure "Malama Dental" is mentioned
-  if (!contentLower.includes('malama dental')) {
-    issues.push('Practice name "Malama Dental" not found in content');
+  // Additional verification: ensure business name is mentioned
+  if (!contentLower.includes(businessName.toLowerCase())) {
+    issues.push(`Practice name "${businessName}" not found in content`);
   }
 
   // If no issues, return early
@@ -81,9 +85,6 @@ export const verifyAndCorrectContent = async (
     };
   }
 
-  // Get business name dynamically
-  const businessName = process.env.BUSINESS_NAME || 'Malama Dental';
-  
   // Use LLM to correct issues
   const correctionPrompt = `You are a content quality reviewer for ${businessName}. Review and correct the following ${task}:
 

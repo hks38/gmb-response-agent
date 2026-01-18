@@ -7,64 +7,576 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Review {
-  id               Int      @id @default(autoincrement())
-  reviewId         String   @unique
-  authorName       String
-  rating           Int
-  comment          String?
-  createTime       DateTime
-  updateTime       DateTime
-  sentiment        String?
-  urgency          String?
-  topics           String? // JSON array stored as string
-  suggestedActions String? // JSON array stored as string
-  riskFlags        String? // JSON array stored as string
-  replyDraft       String?
-  status           String   @default("Needs Approval")
-  lastAnalyzedAt   DateTime?
-  repliedAt        DateTime?
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships BusinessMembership[]
+  magicLinks  AuthMagicLink[]
+  auditEvents AuditEvent[]         @relation("UserAuditEvents")
+
+  // Review workflow
+  assignedReviews Review[]             @relation("ReviewAssignee")
+  approvedReviews Review[]             @relation("ReviewApprover")
+  replyVersions   ReviewReplyVersion[] @relation("ReviewReplyVersionCreator")
+}
+
+model Business {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships       BusinessMembership[]
+  locations         Location[]
+  settings          BusinessSettings?
+  googleCredentials GoogleCredential[]
+
+  reviews       Review[]
+  replyVersions ReviewReplyVersion[]
+  trends        KeywordTrend[]
+  weeklyReports KeywordWeeklyReport[]
+  jobRuns       JobRun[]
+  auditEvents   AuditEvent[]          @relation("BusinessAuditEvents")
+
+  replyTemplates     ReplyTemplate[]
+  replyVoiceProfiles ReplyVoiceProfile[]
+
+  // Competitive insights
+  competitors               Competitor[]
+  competitorSnapshots       CompetitorSnapshot[]
+  competitorThemes          CompetitorTheme[]
+  competitorKeywordProfiles CompetitorKeywordProfile[]
+}
+
+model BusinessMembership {
+  id         String   @id @default(cuid())
+  userId     String
+  businessId String
+  role       String   @default("STAFF") // OWNER | ADMIN | STAFF
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, businessId])
+  @@index([businessId])
+  @@index([userId])
+}
+
+model Location {
+  id               String   @id @default(cuid())
+  businessId       String
+  name             String
+  address          String?
+  googleAccountId  String? // accounts/{accountId}
+  googleLocationId String? // locations/{locationId}
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  business             Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  credentials          GoogleCredential[]
+  reviews              Review[]
+  keywordTrends        KeywordTrend[]        @relation("LocationKeywordTrends")
+  keywordWeeklyReports KeywordWeeklyReport[] @relation("LocationKeywordWeeklyReports")
+  jobRuns              JobRun[]
+
+  // Competitive insights (optional scoping)
+  competitors Competitor[]
+
+  @@index([businessId])
+  @@index([googleAccountId])
+  @@index([googleLocationId])
+}
+
+// Competitive insights
+model Competitor {
+  id         String  @id @default(cuid())
+  businessId String
+  locationId String? // internal Location.id (optional scope)
+
+  placeId    String
+  name       String
+  address    String?
+  websiteUrl String?
+  phone      String?
+
+  status String  @default("active") // active | hidden
+  source String  @default("discovered") // discovered | manual
+  locked Boolean @default(false) // if true, discovery will not overwrite key fields
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  snapshots       CompetitorSnapshot[]
+  themes          CompetitorTheme[]
+  keywordProfiles CompetitorKeywordProfile[]
+
+  @@unique([businessId, placeId])
+  @@index([businessId, status])
+  @@index([locationId, status])
+}
+
+model CompetitorSnapshot {
+  id           String   @id @default(cuid())
+  businessId   String
+  competitorId String
+  capturedAt   DateTime @default(now())
+
+  rating           Float?
+  userRatingsTotal Int?
+  reviewsJson      String? // raw Places reviews payload (limited)
+
+  // Website analysis
+  websiteRating       Int? // 0-100 overall website quality score
+  websiteAnalysisJson String? // JSON with detailed analysis: {seo: {score, details}, content: {score, details}, features: {score, details}, overall: {score, recommendations}}
+
+  createdAt DateTime @default(now())
+
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  competitor Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, competitorId, capturedAt])
+  @@index([capturedAt])
+}
+
+model CompetitorTheme {
+  id           String @id @default(cuid())
+  businessId   String
+  competitorId String
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  theme        String
+  sentiment    String? // positive | neutral | negative
+  count        Int     @default(0)
+  examplesJson String? // JSON array of short example snippets
+
+  createdAt DateTime @default(now())
+
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  competitor Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, competitorId, periodStart])
+}
+
+model CompetitorKeywordProfile {
+  id           String   @id @default(cuid())
+  businessId   String
+  competitorId String
+  capturedAt   DateTime @default(now())
+
+  keywordsJson String // JSON array of keywords
+  createdAt    DateTime @default(now())
+
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  competitor Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, competitorId, capturedAt])
+}
+
+model GoogleCredential {
+  id              String    @id @default(cuid())
+  businessId      String
+  locationId      String
+  provider        String    @default("google_gbp")
+  refreshTokenEnc String
+  accessTokenEnc  String?
+  expiryDate      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, provider])
+  @@index([businessId])
+}
+
+model BusinessSettings {
+  id         String @id @default(cuid())
+  businessId String @unique
+
+  // Business identity (non-secret)
+  businessName     String  @default("Malama Dental")
+  businessLocation String  @default("Long Valley, NJ")
+  websiteUrl       String  @default("https://malama.dental")
+  businessPhone    String?
+  businessEmail    String?
+
+  emailTo String @default("malamadentalgroup@gmail.com")
+
+  schedulerEnabled      Boolean @default(true)
+  schedulerTz           String  @default("America/New_York")
+  dailyReviewsCron      String  @default("0 19 * * *")
+  twiceWeeklyPostCron   String  @default("0 10 * * 2,5")
+  monthlyReportCron     String  @default("0 9 1 * *")
+  avoidRepeatLastNPosts Int     @default(5)
+
+  reviewMinWords  Int    @default(25)
+  reviewMaxWords  Int    @default(150)
+  reviewSignature String @default("Warm regards,\n{businessName} Team")
+
+  gmbPostMaxWords Int @default(150)
+
+  // Compliance / safety (tenant-configurable)
+  bannedPhrasesJson String? // JSON array of strings (banned phrases)
+
+  // Optional signature variations (JSON string)
+  // Example:
+  // {"default":{"en":"Warm regards,\\n{businessName} Team","es":"Saludos cordiales,\\nEquipo de {businessName}"},"negative":{"en":"Sincerely,\\n{businessName} Team"}}
+  reviewSignatureVariantsJson String?
+
+  defaultUseSerpApiRankings       Boolean @default(false)
+  monthlyReportUseSerpApiRankings Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model ReplyVoiceProfile {
+  id         String  @id @default(cuid())
+  businessId String
+  name       String
+  enabled    Boolean @default(true)
+
+  // Voice controls
+  tone  String @default("warm, friendly, professional")
+  style String @default("concise and professional")
+
+  // JSON arrays of strings
+  doListJson         String?
+  dontListJson       String?
+  examplePhrasesJson String?
+  bannedPhrasesJson  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+model ReplyTemplate {
+  id         String  @id @default(cuid())
+  businessId String
+  name       String
+  enabled    Boolean @default(true)
+  priority   Int     @default(0) // higher wins
+
+  // Matching criteria
+  ratingMin    Int     @default(1)
+  ratingMax    Int     @default(5)
+  sentiment    String? // positive|neutral|negative|null(any)
+  topicsJson   String? // JSON array (null/[] = any)
+  languageCode String? // BCP-47 or ISO (null = any)
+
+  // Template payload
+  instructions     String?
+  bodyTemplate     String?
+  variantHintsJson String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, enabled, priority])
+}
+
+model AuthMagicLink {
+  id        String    @id @default(cuid())
+  userId    String?
+  email     String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model JobRun {
+  id         String  @id @default(cuid())
+  businessId String
+  locationId String?
+
+  jobType   String // e.g., daily_reviews | twice_weekly_post | monthly_report
+  status    String // success | error
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  countsJson String? // JSON string for counts (fetched/analyzed/posted/etc)
+  error      String?
+
+  createdAt DateTime @default(now())
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, startedAt])
+  @@index([locationId])
+  @@index([jobType, startedAt])
+}
+
+model Review {
+  id                Int       @id @default(autoincrement())
+  businessId        String
+  locationId        String
+  reviewId          String
+  authorName        String
+  rating            Int
+  comment           String?
+  createTime        DateTime
+  updateTime        DateTime
+  sentiment         String?
+  urgency           String?
+  topics            String? // JSON array stored as string
+  suggestedActions  String? // JSON array stored as string
+  riskFlags         String? // JSON array stored as string
+  replyDraft        String?
+  replyLanguageCode String?
+  replyVariantsJson String? // JSON payload: {A,B,selected,qc,...}
+  status            String    @default("Needs Approval")
+  lastAnalyzedAt    DateTime?
+  repliedAt         DateTime?
+
+  // Workflow
+  assignedToUserId   String?
+  assignedAt         DateTime?
+  approvedByUserId   String?
+  approvedAt         DateTime?
+  needsApprovalSince DateTime?
+  lastReminderAt     DateTime?
+  escalationLevel    Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  assignedTo User? @relation("ReviewAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  approvedBy User? @relation("ReviewApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+
+  replyVersions ReviewReplyVersion[]
+
+  @@unique([locationId, reviewId])
+  @@index([businessId, createTime])
+  @@index([locationId, status])
+  @@index([businessId, status])
+  @@index([assignedToUserId, status])
+}
+
+model ReviewReplyVersion {
+  id         String @id @default(cuid())
+  businessId String
+  reviewId   Int
+
+  text              String
+  source            String // ai | human | system
+  note              String?
+  diffBaseVersionId String?
+
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+
+  business  Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  createdBy User?    @relation("ReviewReplyVersionCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, createdAt])
+  @@index([reviewId, createdAt])
+  @@index([createdByUserId, createdAt])
 }
 
 model KeywordTrend {
   id                Int      @id @default(autoincrement())
+  businessId        String
+  locationId        String?
   keyword           String
-  location          String   // e.g., "Long Valley, NJ" or coordinates
+  location          String // e.g., "Long Valley, NJ" or coordinates
   latitude          Float?
   longitude         Float?
   radius            Int      @default(10) // radius in miles
-  searchVolume      Int?     // Estimated search volume (0-100 scale for Google Trends)
-  trendScore        Float?   // Calculated trend score (change over time)
+  searchVolume      Int? // Estimated search volume (0-100 scale for Google Trends)
+  trendScore        Float? // Calculated trend score (change over time)
   weekOf            DateTime // Week start date (Monday)
-  previousWeekScore Float?   // Previous week's score for comparison
-  category          String?  // e.g., "general", "cosmetic", "emergency", "pediatric"
+  previousWeekScore Float? // Previous week's score for comparison
+  category          String? // e.g., "general", "cosmetic", "emergency", "pediatric"
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  @@unique([keyword, location, weekOf])
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  locationRel Location? @relation("LocationKeywordTrends", fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@unique([businessId, keyword, location, weekOf])
   @@index([weekOf])
   @@index([keyword])
   @@index([location])
+  @@index([businessId])
 }
 
 model KeywordWeeklyReport {
-  id                Int      @id @default(autoincrement())
-  reportDate        DateTime @default(now())
-  location          String
-  latitude          Float?
-  longitude         Float?
-  radius            Int      @default(10)
-  totalKeywords     Int
-  topKeywords       String   // JSON array of top keywords
-  trendingUp        String?  // JSON array of keywords trending up
-  trendingDown      String?  // JSON array of keywords trending down
-  summary           String?  // AI-generated summary
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  businessId    String
+  locationId    String?
+  reportDate    DateTime @default(now())
+  location      String
+  latitude      Float?
+  longitude     Float?
+  radius        Int      @default(10)
+  totalKeywords Int
+  topKeywords   String // JSON array of top keywords
+  trendingUp    String? // JSON array of keywords trending up
+  trendingDown  String? // JSON array of keywords trending down
+  summary       String? // AI-generated summary
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  locationRel Location? @relation("LocationKeywordWeeklyReports", fields: [locationId], references: [id], onDelete: SetNull)
 
   @@index([reportDate])
   @@index([location])
+  @@index([businessId])
 }
 
+model Practice {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  latitude    Float
+  longitude   Float
+  radiusMiles Int      @default(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  areas    Area[]
+  analyses Analysis[]
+}
+
+model Area {
+  id            String   @id @default(cuid())
+  name          String
+  city          String
+  state         String
+  latitude      Float
+  longitude     Float
+  distanceMiles Float
+  geocode       String // Google location ID
+  practiceId    String
+  practice      Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+
+  keywordCosts KeywordCost[]
+  createdAt    DateTime      @default(now())
+
+  @@index([practiceId])
+}
+
+model KeywordCost {
+  id      String @id @default(cuid())
+  keyword String
+  areaId  String
+  area    Area   @relation(fields: [areaId], references: [id], onDelete: Cascade)
+
+  avgCpc        Float
+  minCpc        Float
+  maxCpc        Float
+  searchVolume  Int
+  competition   String // LOW, MEDIUM, HIGH
+  specialtyType String? // veneers, invisalign, implants, etc.
+
+  fetchedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([areaId])
+  @@index([keyword])
+  @@index([specialtyType])
+}
+
+model Analysis {
+  id         String   @id @default(cuid())
+  practiceId String
+  practice   Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+
+  topAreas  String // JSON: Ranked areas by opportunity
+  summary   String
+  createdAt DateTime @default(now())
+
+  @@index([practiceId])
+}
+
+// Note: `AppSettings` is superseded by `BusinessSettings` for multi-tenant.
+
+// Legacy singleton settings (kept temporarily for migration/backwards compatibility).
+// Will be removed once all code paths use `BusinessSettings`.
+model AppSettings {
+  id String @id @default("default")
+
+  businessName     String  @default("Malama Dental")
+  businessLocation String  @default("Long Valley, NJ")
+  websiteUrl       String  @default("https://malama.dental")
+  businessPhone    String?
+  businessEmail    String?
+
+  emailTo String @default("malamadentalgroup@gmail.com")
+
+  schedulerEnabled      Boolean @default(true)
+  schedulerTz           String  @default("America/New_York")
+  dailyReviewsCron      String  @default("0 19 * * *")
+  twiceWeeklyPostCron   String  @default("0 10 * * 2,5")
+  monthlyReportCron     String  @default("0 9 1 * *")
+  avoidRepeatLastNPosts Int     @default(5)
+
+  reviewMinWords  Int    @default(25)
+  reviewMaxWords  Int    @default(150)
+  reviewSignature String @default("Warm regards,\n{businessName} Team")
+
+  gmbPostMaxWords Int @default(150)
+
+  defaultUseSerpApiRankings       Boolean @default(false)
+  monthlyReportUseSerpApiRankings Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditEvent {
+  id          String  @id @default(cuid())
+  businessId  String
+  actorUserId String?
+  actorRole   String?
+
+  action     String // APPROVE_REVIEW_REPLY | POST_REVIEW_REPLY | AUTO_POST_REVIEW_REPLY | POST_GMB_POST | ...
+  targetType String // REVIEW | POST | ...
+  targetId   String? // Internal ID (stringified)
+
+  originalSha256     String
+  sanitizedSha256    String
+  violationCodesJson String? // JSON array of violation codes
+  metadataJson       String? // JSON metadata (google IDs, etc)
+
+  createdAt DateTime @default(now())
+
+  business Business @relation("BusinessAuditEvents", fields: [businessId], references: [id], onDelete: Cascade)
+  actor    User?    @relation("UserAuditEvents", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+}

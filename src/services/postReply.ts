@@ -14,6 +14,8 @@ export const postReplyToReview = async (params: {
   locationId: string;
   reviewId: string;
   replyText: string;
+  businessId?: string;
+  locationIdInternal?: string;
 }): Promise<void> => {
   const numericLocationId = params.locationId.startsWith('locations/')
     ? params.locationId.split('/')[1]
@@ -25,7 +27,7 @@ export const postReplyToReview = async (params: {
   const endpoint = `${BASE_URL_V4}/accounts/${accountIdClean}/locations/${numericLocationId}/reviews/${params.reviewId}/reply`;
 
   // Ensure we have a fresh token before posting
-  const client = await buildClient();
+  const client = await buildClient({ businessId: params.businessId, locationIdInternal: params.locationIdInternal });
   
   console.log(`Posting reply to review: ${params.reviewId}...`);
   console.log(`Endpoint: ${endpoint}`);
@@ -68,10 +70,10 @@ export const postReplyToReview = async (params: {
   }
 };
 
-const buildClient = async () => {
+const buildClient = async (auth?: { businessId?: string; locationIdInternal?: string }) => {
   let token: string | undefined;
   try {
-    token = await getAccessToken();
+    token = await getAccessToken(auth);
   } catch (error) {
     token = process.env.GOOGLE_ACCESS_TOKEN;
     if (!token) {

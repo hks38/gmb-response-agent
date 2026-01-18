@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 import { getWebsiteContext } from './websiteContext';
+import { getBusinessSettings } from './settingsService';
+import { getDefaultBusinessId } from './tenantDefaults';
 
 dotenv.config();
 
@@ -14,22 +16,29 @@ export interface BusinessConfig {
 /**
  * Get business configuration from environment variables or website context
  */
-export const getBusinessConfig = async (): Promise<BusinessConfig> => {
-  // Priority: ENV vars > Website context > Defaults
-  
+export const getBusinessConfig = async (businessIdOverride?: string): Promise<BusinessConfig> => {
+  // Priority: Settings (DB) > ENV vars > Website context > Defaults
+  let settings: any = null;
+  try {
+    const businessId = businessIdOverride || (await getDefaultBusinessId());
+    settings = await getBusinessSettings(businessId);
+  } catch {
+    // non-fatal: fall back to env / website context
+  }
+
   const config: BusinessConfig = {
-    name: process.env.BUSINESS_NAME || 'Malama Dental',
-    location: process.env.BUSINESS_LOCATION || 'Long Valley, NJ',
-    websiteUrl: process.env.WEBSITE_URL || 'https://malama.dental',
-    phone: process.env.BUSINESS_PHONE,
-    email: process.env.BUSINESS_EMAIL,
+    name: settings?.businessName || process.env.BUSINESS_NAME || 'Malama Dental',
+    location: settings?.businessLocation || process.env.BUSINESS_LOCATION || 'Long Valley, NJ',
+    websiteUrl: settings?.websiteUrl || process.env.WEBSITE_URL || 'https://malama.dental',
+    phone: settings?.businessPhone || process.env.BUSINESS_PHONE,
+    email: settings?.businessEmail || process.env.BUSINESS_EMAIL,
   };
 
   // ENV variables take priority - only use website context as fallback if ENV not set
   // Always prioritize BUSINESS_NAME from ENV for consistency
   
   // Try to enrich from website context ONLY if ENV vars not set
-  if (!process.env.BUSINESS_PHONE || !process.env.BUSINESS_LOCATION) {
+  if ((!config.phone && !process.env.BUSINESS_PHONE) || (!process.env.BUSINESS_LOCATION && !config.location)) {
     try {
       const websiteContext = await getWebsiteContext();
       if (websiteContext) {
@@ -37,7 +46,7 @@ export const getBusinessConfig = async (): Promise<BusinessConfig> => {
         if (!process.env.BUSINESS_LOCATION) {
           config.location = websiteContext.location || config.location;
         }
-        if (!process.env.BUSINESS_PHONE) {
+        if (!process.env.BUSINESS_PHONE && !config.phone) {
           config.phone = websiteContext.phone || config.phone;
         }
         // Note: We never override BUSINESS_NAME from website context - always use ENV or default

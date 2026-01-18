@@ -1,242 +1,321 @@
 import express from 'express';
 import { prisma } from '../db/client';
-import { getHistoricalTrends } from '../services/keywordTrendService';
-import { generateDentalKeywords, extractKeywordsFromContent } from '../services/keywordResearch';
-import { getGoogleTrends, getGeoCode } from '../services/googleTrendsService';
+import {
+  getKeywordCostsForArea,
+  getKeywordCostsBySpecialty,
+  getAggregatedKeywordCosts,
+  fetchKeywordCostsForPractice,
+} from '../services/keywordCostService';
+import { generateDentalKeywords } from '../services/keywordResearch';
+import { researchKeywordTrends } from '../services/keywordTrendService';
+import { getRankingsForKeywords } from '../services/serpRankingService';
+import { getBusinessConfig } from '../services/businessConfig';
+import { requireRole } from '../middleware/rbac';
 
 const router = express.Router();
 
-// Get weekly reports
-router.get('/reports', async (req, res) => {
+/**
+ * Get keyword costs for a specific area
+ * GET /api/keywords/costs/area/:areaId
+ */
+router.get('/costs/area/:areaId', async (req, res) => {
   try {
-    const { location, weeks = 8 } = req.query;
+    const { areaId } = req.params;
+    const { specialtyType } = req.query;
 
-    const where: any = {};
-    if (location) where.location = location;
-
-    // Calculate date range
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - (Number(weeks) * 7));
-
-    where.reportDate = {
-      gte: startDate,
-    };
-
-    const reports = await prisma.keywordWeeklyReport.findMany({
-      where,
-      orderBy: { reportDate: 'desc' },
-    });
-
-    // Parse JSON fields
-    const parsedReports = reports.map(report => ({
-      ...report,
-      topKeywords: JSON.parse(report.topKeywords || '[]'),
-      trendingUp: JSON.parse(report.trendingUp || '[]'),
-      trendingDown: JSON.parse(report.trendingDown || '[]'),
-    }));
-
-    res.json(parsedReports);
-  } catch (err: any) {
-    console.error('Failed to get reports', err);
-    res.status(500).json({ error: err.message || 'Failed to get reports' });
-  }
-});
-
-// Get latest report
-router.get('/reports/latest', async (req, res) => {
-  try {
-    const { location } = req.query;
-
-    const where: any = {};
-    if (location) where.location = location;
-
-    const report = await prisma.keywordWeeklyReport.findFirst({
-      where,
-      orderBy: { reportDate: 'desc' },
-    });
-
-    if (!report) {
-      return res.status(404).json({ error: 'No reports found' });
+    let costs;
+    if (specialtyType) {
+      costs = await prisma.keywordCost.findMany({
+        where: {
+          areaId,
+          specialtyType: specialtyType as string,
+        },
+        orderBy: { avgCpc: 'desc' },
+      });
+    } else {
+      costs = await getKeywordCostsForArea(areaId);
     }
 
-    // Parse JSON fields
-    const parsedReport = {
-      ...report,
-      topKeywords: JSON.parse(report.topKeywords || '[]'),
-      trendingUp: JSON.parse(report.trendingUp || '[]'),
-      trendingDown: JSON.parse(report.trendingDown || '[]'),
-    };
-
-    res.json(parsedReport);
+    res.json({
+      success: true,
+      costs,
+      count: costs.length,
+    });
   } catch (err: any) {
-    console.error('Failed to get latest report', err);
-    res.status(500).json({ error: err.message || 'Failed to get latest report' });
+    console.error('Failed to get keyword costs:', err);
+    res.status(500).json({ error: err.message || 'Failed to get keyword costs' });
   }
 });
 
-// Get historical trends for a keyword
-router.get('/trends/:keyword', async (req, res) => {
+/**
+ * Get keyword costs by specialty type for a practice
+ * GET /api/keywords/costs?practiceId=xxx&specialtyType=invisalign
+ */
+router.get('/costs', async (req, res) => {
   try {
-    const { keyword } = req.params;
-    const { location, weeks = 12 } = req.query;
+    const { practiceId, specialtyType } = req.query;
 
-    const trends = await getHistoricalTrends({
-      keyword,
-      location: location as string,
-      weeks: Number(weeks),
+    if (!practiceId) {
+      return res.status(400).json({ error: 'practiceId is required' });
+    }
+
+    const costs = await getKeywordCostsBySpecialty(
+      practiceId as string,
+      specialtyType as string | undefined
+    );
+
+    res.json({
+      success: true,
+      costs,
+      count: costs.length,
+    });
+  } catch (err: any) {
+    console.error('Failed to get keyword costs:', err);
+    res.status(500).json({ error: err.message || 'Failed to get keyword costs' });
+  }
+});
+
+/**
+ * Get aggregated keyword costs across all areas
+ * GET /api/keywords/costs/aggregated?practiceId=xxx
+ */
+router.get('/costs/aggregated', async (req, res) => {
+  try {
+    const { practiceId } = req.query;
+
+    if (!practiceId) {
+      return res.status(400).json({ error: 'practiceId is required' });
+    }
+
+    const aggregated = await getAggregatedKeywordCosts(practiceId as string);
+
+    res.json({
+      success: true,
+      keywords: aggregated,
+      count: aggregated.length,
+    });
+  } catch (err: any) {
+    console.error('Failed to get aggregated costs:', err);
+    res.status(500).json({ error: err.message || 'Failed to get aggregated costs' });
+  }
+});
+
+/**
+ * Fetch fresh keyword costs for a practice
+ * POST /api/keywords/costs/fetch
+ */
+router.post('/costs/fetch', async (req, res) => {
+  try {
+    const { practiceId, forceRefresh = false } = req.body;
+
+    if (!practiceId) {
+      return res.status(400).json({ error: 'practiceId is required' });
+    }
+
+    // This is an async operation, so we'll start it and return immediately
+    fetchKeywordCostsForPractice(practiceId, forceRefresh).catch(err => {
+      console.error('Background keyword cost fetch failed:', err);
     });
 
-    res.json(trends);
+    res.json({
+      success: true,
+      message: 'Keyword cost fetching started. This may take a few minutes.',
+    });
+  } catch (err: any) {
+    console.error('Failed to start keyword cost fetch:', err);
+    res.status(500).json({ error: err.message || 'Failed to start keyword cost fetch' });
+  }
+});
+
+/**
+ * GET /api/keywords/trends
+ * Get the latest weekly keyword report
+ */
+router.get('/trends', async (req, res) => {
+  try {
+    const tenant = (req as any).tenant as { businessId?: string } | undefined;
+    if (!tenant?.businessId) return res.status(400).json({ error: 'Missing tenant context' });
+    // Get the latest weekly report from database
+    // First try consolidated report (all locations)
+    let report = await prisma.keywordWeeklyReport.findFirst({
+      where: {
+        businessId: tenant.businessId,
+        location: { contains: 'All Locations' },
+      },
+      orderBy: { reportDate: 'desc' },
+    });
+
+    // If no consolidated report, get the most recent report
+    if (!report) {
+      report = await prisma.keywordWeeklyReport.findFirst({
+        where: { businessId: tenant.businessId },
+        orderBy: { reportDate: 'desc' },
+      });
+    }
+    
+    if (!report) {
+      return res.json({
+        success: false,
+        message: 'No weekly report found. Generate a weekly report first.',
+      });
+    }
+
+    // Parse JSON strings back to arrays
+    const topKeywords = report.topKeywords ? JSON.parse(report.topKeywords) : [];
+    const trendingUp = report.trendingUp ? JSON.parse(report.trendingUp) : [];
+    const trendingDown = report.trendingDown ? JSON.parse(report.trendingDown) : [];
+
+    res.json({
+      success: true,
+      reportDate: report.reportDate,
+      location: report.location,
+      latitude: report.latitude,
+      longitude: report.longitude,
+      radius: report.radius,
+      totalKeywords: report.totalKeywords,
+      topKeywords,
+      trendingUp,
+      trendingDown,
+      summary: report.summary,
+    });
   } catch (err: any) {
     console.error('Failed to get trends', err);
-    res.status(500).json({ error: err.message || 'Failed to get trends' });
+    res.status(500).json({ error: 'Failed to get trends', message: err.message });
   }
 });
 
-// Get all keywords with trends
-router.get('/keywords', async (req, res) => {
+/**
+ * GET /api/keywords/research-defaults
+ * Returns default business name and website domain used for ranking comparisons.
+ */
+router.get('/research-defaults', async (_req, res) => {
   try {
-    const { location, weeks = 8 } = req.query;
+    const cfg = await getBusinessConfig();
+    const defaultBusinessName = process.env.RANKING_BUSINESS_NAME || cfg.name;
+    // Provide domain, not full URL, for matching
+    const defaultWebsiteDomain = (process.env.RANKING_WEBSITE_DOMAIN || cfg.websiteUrl)
+      .replace(/^https?:\/\//i, '')
+      .replace(/^www\./i, '')
+      .split('/')[0];
 
-    const where: any = {};
-    if (location) where.location = location;
-
-    // Calculate date range
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - (Number(weeks) * 7));
-
-    where.weekOf = {
-      gte: startDate,
-    };
-
-    const trends = await prisma.keywordTrend.findMany({
-      where,
-      orderBy: { weekOf: 'desc' },
-      distinct: ['keyword'],
+    res.json({
+      success: true,
+      defaultBusinessName,
+      defaultWebsiteDomain,
     });
-
-    res.json(trends);
   } catch (err: any) {
-    console.error('Failed to get keywords', err);
-    res.status(500).json({ error: err.message || 'Failed to get keywords' });
+    console.error('Failed to get research defaults', err);
+    res.status(500).json({ error: 'Failed to get research defaults', message: err.message });
   }
 });
 
-// Research keywords for a location
+/**
+ * POST /api/keywords/research
+ * Research keywords for a location
+ */
 router.post('/research', async (req, res) => {
   try {
-    const { location, radius = 10 } = req.body;
+    const { location, radius = 10, includeRankings = true, businessName, websiteDomain } = req.body;
 
     if (!location) {
       return res.status(400).json({ error: 'Location is required' });
     }
 
-    // Generate dental keywords with location
+    // Generate dental keywords for the location
     const keywords = generateDentalKeywords(location);
-    
-    // Get trends for keywords
-    const geoCode = getGeoCode(location);
-    const keywordTrends = [];
-    
-    for (const keyword of keywords.slice(0, 20)) { // Limit to top 20 to avoid rate limits
+
+    // Optional: attach ranking data (GBP + website)
+    let rankings: any[] = [];
+    if (includeRankings) {
       try {
-        const trends = await getGoogleTrends({
-          keywords: [keyword],
-          geo: geoCode,
-          timeframe: 'today 3-m',
+        rankings = await getRankingsForKeywords({
+          keywords, // no limit: compute rankings for all generated keywords
+          location,
+          limit: keywords.length,
+          businessName: typeof businessName === 'string' && businessName.trim() ? businessName.trim() : undefined,
+          websiteDomain: typeof websiteDomain === 'string' && websiteDomain.trim() ? websiteDomain.trim() : undefined,
         });
-        
-        if (trends && trends.length > 0) {
-          const trend = trends[0];
-          keywordTrends.push({
-            keyword,
-            volume: trend.currentValue || trend.averages?.month || 0,
-            trend: trend.currentValue > (trend.averages?.month || 0) ? 'up' : 'down',
-          });
-        }
-        
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (err) {
-        // Continue with next keyword
-        console.warn(`Failed to get trends for ${keyword}:`, err);
+      } catch (e: any) {
+        // Non-fatal: return keywords anyway
+        rankings = [
+          {
+            provider: 'none',
+            keyword: keywords[0],
+            location,
+            notes: `rankings_error:${e.message}`,
+          },
+        ];
       }
     }
 
-    // Sort by volume
-    keywordTrends.sort((a, b) => (b.volume || 0) - (a.volume || 0));
-
     res.json({
       success: true,
-      keywordsCount: keywordTrends.length,
-      topKeywords: keywordTrends,
-      location: location,
+      keywordsCount: keywords.length,
+      topKeywords: keywords.slice(0, 20).map((kw) => ({ keyword: kw })),
+      rankings,
+      location,
+      radius,
     });
   } catch (err: any) {
     console.error('Failed to research keywords', err);
-    res.status(500).json({ error: err.message || 'Failed to research keywords' });
+    res.status(500).json({ error: 'Failed to research keywords', message: err.message });
   }
 });
 
-// Generate weekly keyword report
-router.post('/weekly-report', async (req, res) => {
+/**
+ * POST /api/keywords/weekly-report
+ * Generate a weekly keyword report for location(s)
+ */
+router.post('/weekly-report', requireRole(['OWNER', 'ADMIN']), async (req, res) => {
   try {
-    const { location } = req.body;
+    const { location } = req.body; // Optional: specific location, or null for all locations
+    const tenant = (req as any).tenant as { businessId?: string; locationId?: string | null } | undefined;
+    if (!tenant?.businessId) return res.status(400).json({ error: 'Missing tenant context' });
 
-    // This is a simplified version - in production you'd call the full script logic
-    // For now, we'll trigger it and return a success message
-    // The actual generation should be done via the script: npm run weekly-keyword-report
+    const accountId = process.env.GOOGLE_ACCOUNT_ID || '';
+    const locationId = process.env.GOOGLE_LOCATION_ID || '';
+
+    if (!accountId || !locationId) {
+      return res.status(400).json({ 
+        error: 'GOOGLE_ACCOUNT_ID and GOOGLE_LOCATION_ID must be set' 
+      });
+    }
+
+    // Clean up location ID (remove "locations/" prefix if present)
+    const numericLocationId = locationId.startsWith('locations/')
+      ? locationId.split('/')[1]
+      : locationId;
     
+    const accountIdClean = accountId.replace(/^accounts\//, '');
+
+    // Generate weekly report
+    const report = await researchKeywordTrends({
+      accountId: accountIdClean,
+      locationId: numericLocationId,
+      radius: 10,
+      businessId: tenant.businessId,
+      locationIdInternal: tenant.locationId || undefined,
+    });
+
     res.json({
       success: true,
-      message: 'Weekly report generation started. Please run: npm run weekly-keyword-report',
-      note: 'For full functionality, use the dedicated script which processes all locations.',
+      report: {
+        location: report.location,
+        totalKeywords: report.totalKeywords,
+        topKeywords: report.topKeywords,
+        trendingUp: report.trendingUp,
+        trendingDown: report.trendingDown,
+        summary: report.summary,
+      },
+      message: 'Weekly report generated successfully',
     });
   } catch (err: any) {
     console.error('Failed to generate weekly report', err);
-    res.status(500).json({ error: err.message || 'Failed to generate weekly report' });
-  }
-});
-
-// Get latest trends (for UI)
-router.get('/trends', async (req, res) => {
-  try {
-    const { location } = req.query;
-
-    const where: any = {};
-    if (location) {
-      where.location = location;
-    } else {
-      // If no location specified, get the most recent report
-      where.OR = [
-        { location: { contains: 'All Locations' } },
-        { location: null },
-      ];
-    }
-
-    const report = await prisma.keywordWeeklyReport.findFirst({
-      where,
-      orderBy: { reportDate: 'desc' },
+    res.status(500).json({ 
+      error: 'Failed to generate weekly report', 
+      message: err.message 
     });
-
-    if (!report) {
-      return res.status(404).json({ error: 'No trends available. Generate a weekly report first.' });
-    }
-
-    // Parse JSON fields
-    const parsedReport = {
-      ...report,
-      topKeywords: report.topKeywords ? JSON.parse(report.topKeywords) : [],
-      trendingUp: report.trendingUp ? JSON.parse(report.trendingUp) : [],
-      trendingDown: report.trendingDown ? JSON.parse(report.trendingDown) : [],
-    };
-
-    res.json(parsedReport);
-  } catch (err: any) {
-    console.error('Failed to get trends', err);
-    res.status(500).json({ error: err.message || 'Failed to get trends' });
   }
 });
 
 export default router;
-

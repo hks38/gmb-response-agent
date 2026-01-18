@@ -164,3 +164,4 @@ export const calculateTrendChange = (current: number, previous: number): number 
   return Math.round(((current - previous) / previous) * 100 * 10) / 10;
 };
 
+

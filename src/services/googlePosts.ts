@@ -36,6 +36,8 @@ export interface GBPLocalPostInput {
   accountId: string;
   locationId: string;
   post: GBPLocalPost;
+  businessId?: string;
+  locationIdInternal?: string;
 }
 
 export interface GBPLocalPostResponse {
@@ -50,7 +52,7 @@ export interface GBPLocalPostResponse {
  * Create a local post on Google Business Profile
  */
 export const createLocalPost = async (params: GBPLocalPostInput): Promise<GBPLocalPostResponse> => {
-  const client = await buildClient();
+  const client = await buildClient({ businessId: params.businessId, locationIdInternal: params.locationIdInternal });
   
   const numericLocationId = params.locationId.startsWith('locations/')
     ? params.locationId.split('/')[1]
@@ -171,10 +173,10 @@ const handlePostError = (error: any, params: GBPLocalPostInput) => {
   throw error;
 };
 
-const buildClient = async () => {
+const buildClient = async (auth?: { businessId?: string; locationIdInternal?: string }) => {
   let token: string | undefined;
   try {
-    token = await getAccessToken();
+    token = await getAccessToken(auth);
   } catch (error) {
     token = process.env.GOOGLE_ACCESS_TOKEN;
     if (!token) {
@@ -198,8 +200,10 @@ const buildClient = async () => {
 export const listLocalPosts = async (params: {
   accountId: string;
   locationId: string;
+  businessId?: string;
+  locationIdInternal?: string;
 }): Promise<GBPLocalPostResponse[]> => {
-  const client = await buildClient();
+  const client = await buildClient({ businessId: params.businessId, locationIdInternal: params.locationIdInternal });
   
   const numericLocationId = params.locationId.startsWith('locations/')
     ? params.locationId.split('/')[1]

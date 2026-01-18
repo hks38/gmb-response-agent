@@ -16,3 +16,4 @@ npm run weekly-keyword-report >> logs/weekly-report-$(date +%Y%m%d).log 2>&1
 # Optional: Send email notification (requires mail setup)
 # echo "Weekly keyword report completed. Check logs/weekly-report-$(date +%Y%m%d).log" | mail -s "Weekly Keyword Report - $(date +%Y-%m-%d)" your-email@example.com
 
+

@@ -3,6 +3,7 @@ import { getLocationDetails, getLocationString } from './locationService';
 import { generateDentalKeywords, extractKeywordsFromContent } from './keywordResearch';
 import { getGoogleTrends, getGeoCode, calculateTrendChange } from './googleTrendsService';
 import { llmService } from './llmService';
+import { getDefaultBusinessId, getDefaultLocationId } from './tenantDefaults';
 
 export interface WeeklyKeywordReport {
   location: string;
@@ -30,8 +31,12 @@ export const researchKeywordTrends = async (params: {
   locationId: string;
   radius?: number; // in miles, default 10
   keywords?: string[]; // optional custom keywords
+  businessId?: string;
+  locationIdInternal?: string;
 }): Promise<WeeklyKeywordReport> => {
   const { accountId, locationId, radius = 10, keywords: customKeywords } = params;
+  const businessId = params.businessId || (await getDefaultBusinessId());
+  const locationIdInternal = params.locationIdInternal || (await getDefaultLocationId());
 
   // Get location coordinates
   const locationDetails = await getLocationDetails({ accountId, locationId });
@@ -68,7 +73,8 @@ export const researchKeywordTrends = async (params: {
     
     const previousTrend = await prisma.keywordTrend.findUnique({
       where: {
-        keyword_location_weekOf: {
+        businessId_keyword_location_weekOf: {
+          businessId,
           keyword: trend.keyword,
           location: locationString,
           weekOf: previousWeek,
@@ -82,13 +88,16 @@ export const researchKeywordTrends = async (params: {
     // Store or update trend
     const keywordTrend = await prisma.keywordTrend.upsert({
       where: {
-        keyword_location_weekOf: {
+        businessId_keyword_location_weekOf: {
+          businessId,
           keyword: trend.keyword,
           location: locationString,
           weekOf,
         },
       },
       create: {
+        businessId,
+        locationId: locationIdInternal,
         keyword: trend.keyword,
         location: locationString,
         latitude: locationDetails.latitude,
@@ -139,6 +148,8 @@ export const researchKeywordTrends = async (params: {
   // Create weekly report
   const report = await prisma.keywordWeeklyReport.create({
     data: {
+      businessId,
+      locationId: locationIdInternal,
       reportDate: weekOf,
       location: locationString,
       latitude: locationDetails.latitude,

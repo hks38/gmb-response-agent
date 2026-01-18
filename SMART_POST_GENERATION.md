@@ -217,3 +217,4 @@ The smart post generator integrates seamlessly with the weekly keyword report:
 
 This ensures your GMB posts stay aligned with what people are actually searching for in your area!
 
+

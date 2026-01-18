@@ -32,6 +32,129 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
+    .header-inner {
+        display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .header-left {
+      min-width: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .biz-switcher {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border-radius: 999px;
+    }
+
+    .biz-switcher select {
+      background: transparent;
+      border: none;
+      color: white;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+      max-width: 240px;
+    }
+
+    .biz-switcher select option {
+      color: #111;
+    }
+
+    .profile-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+      user-select: none;
+    }
+
+    .profile-btn:hover {
+      background: rgba(255,255,255,0.18);
+    }
+
+    .profile-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: 52px;
+      right: 0;
+      width: 260px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      border: 1px solid rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: none;
+      z-index: 50;
+    }
+
+    .profile-dropdown.open {
+      display: block;
+    }
+
+    .profile-dropdown .pd-header {
+      padding: 14px 16px;
+        border-bottom: 1px solid #eee;
+      color: #333;
+    }
+
+    .profile-dropdown .pd-header .pd-email {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+
+    .profile-dropdown button {
+      width: 100%;
+        text-align: left;
+      padding: 12px 16px;
+      border: none;
+      background: white;
+      cursor: pointer;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .profile-dropdown button:hover {
+      background: #f6f7fb;
+    }
+
+    .profile-dropdown .danger {
+      color: #b42318;
+    }
+
     header h1 {
       font-size: 2rem;
       margin-bottom: 10px;
@@ -55,7 +178,7 @@
       background: white;
       border: 2px solid #e0e0e0;
       border-radius: 8px 8px 0 0;
-      cursor: pointer;
+        cursor: pointer;
       font-weight: 500;
       transition: all 0.3s;
       border-bottom: none;
@@ -627,16 +750,103 @@
       font-size: 0.875rem;
       padding: 6px 12px;
       }
+
+    /* Bulk actions toolbar */
+    .bulk-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      background: #ffffff;
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+    .bulk-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .bulk-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .small-muted {
+      color: #777;
+      font-size: 0.9rem;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .diff-pre {
+      margin: 0;
+      padding: 12px;
+      background: #0b1020;
+      color: #e7e7e7;
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 55vh;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      white-space: pre;
+    }
+    .diff-line {
+      display: block;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .diff-add {
+      background: rgba(46, 204, 113, 0.18);
+    }
+    .diff-del {
+      background: rgba(231, 76, 60, 0.18);
+    }
+    .diff-same {
+      opacity: 0.9;
+      }
     </style>
   </head>
   <body>
   <!-- Notification Container -->
   <div class="notification-container" id="notificationContainer"></div>
     <header>
-    <div class="container">
-      <h1>🦷 GMB Review Response Agent</h1>
-      <p>Malama Dental - Admin Dashboard</p>
-    </div>
+      <div class="container header-inner">
+        <div class="header-left">
+          <h1>🦷 GMB Review Response Agent</h1>
+          <p><span id="headerBusinessName">Malama Dental</span> - Admin Dashboard</p>
+        </div>
+
+        <div class="header-right">
+          <div class="biz-switcher" id="bizSwitcherWrap" title="Active Business">
+            <span style="opacity:0.9; font-weight:800;">🏢</span>
+            <select id="bizSwitcher" onchange="switchBusiness(event)"></select>
+          </div>
+          <div class="profile-menu">
+            <div class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">
+              <div class="profile-avatar" id="profileAvatar">U</div>
+              <div style="display:flex; flex-direction:column; line-height:1.1;">
+                <div style="font-size:0.9rem;" id="profileName">User</div>
+                <div style="font-size:0.8rem; opacity:0.85;" id="profileEmail"> </div>
+              </div>
+              <div style="opacity:0.9;">▾</div>
+            </div>
+
+            <div class="profile-dropdown" id="profileDropdown">
+              <div class="pd-header">
+                <div style="font-weight:800;" id="pdName">Signed in</div>
+                <div class="pd-email" id="pdEmail"></div>
+              </div>
+              <button onclick="openSettings()">⚙️ Settings</button>
+              <button class="danger" onclick="doLogout()">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
   <div class="container">
@@ -662,11 +872,13 @@
 
     <!-- Tabs -->
     <div class="tabs">
-      <div class="tab active" onclick="showTab('reviews')">📝 Reviews</div>
-      <div class="tab" onclick="showTab('reply')">💬 Reply to Review</div>
-      <div class="tab" onclick="showTab('posts')">📄 GMB Posts</div>
-      <div class="tab" onclick="showTab('trends')">📊 Keyword Trends</div>
-      <div class="tab" onclick="showTab('analyzer')">🔍 Profile Analyzer</div>
+      <div class="tab active" onclick="showTab('reviews', event)">📝 Reviews</div>
+      <div class="tab" onclick="showTab('reply', event)">💬 Reply to Review</div>
+      <div class="tab" onclick="showTab('posts', event)">📄 GMB Posts</div>
+      <div class="tab" onclick="showTab('trends', event)">📊 Keyword Trends</div>
+      <div class="tab" onclick="showTab('competitive', event)">🏁 Competitive</div>
+      <div class="tab" onclick="showTab('analyzer', event)">🔍 Profile Analyzer</div>
+      <div class="tab" id="teamTab" style="display:none" onclick="showTab('team', event)">👥 Team</div>
     </div>
 
     <!-- Reviews Tab -->
@@ -706,10 +918,45 @@
           </div>
           <div class="form-group">
             <button class="btn" onclick="loadReviews()">🔄 Refresh</button>
-            <button class="btn btn-success" onclick="fetchNewReviews()">📥 Fetch New Reviews</button>
+            <button class="btn btn-success" onclick="fetchNewReviews(event)">📥 Fetch New Reviews</button>
             <button class="btn btn-secondary" onclick="analyzeAllUnreplied()">🤖 Analyze All Unreplied</button>
             <button class="btn btn-secondary" onclick="autoReplyUnreplied()">⚡ Auto-Reply Approved</button>
           </div>
+        </div>
+      </div>
+
+      <div class="bulk-toolbar" id="bulkToolbar" style="display:none;">
+        <div class="bulk-left">
+          <label class="small-muted" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="selectAllVisible" onchange="toggleSelectAllVisible(this.checked)" />
+            Select all visible
+      </label>
+          <span class="small-muted">Selected: <strong id="selectedCount">0</strong></span>
+          <span class="small-muted" id="overdueApprovals"></span>
+          <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Clear</button>
+        </div>
+        <div class="bulk-right">
+          <button class="btn btn-secondary btn-sm" onclick="bulkCopyDrafts()">📋 Copy Drafts</button>
+          <button class="btn btn-success btn-sm" onclick="bulkApproveAndPost()">✅ Bulk Approve & Post</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 20px; background: #f8f9fa; border: 1px solid #e0e0e0;">
+        <h3 style="margin-top: 0; color: #333;">🔗 Google Business Profile Connection</h3>
+        <p style="color: #666; margin-bottom: 15px;">
+          Connect your Google Business Profile to enable automatic review fetching and replies.
+        </p>
+        <div id="googleConnectionStatus" style="margin-bottom: 15px;">
+          <span class="badge badge-warning">Checking connection...</span>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <!-- Use an anchor so the flow works even if JS has runtime errors -->
+          <a class="btn btn-success" href="/api/auth/google/connect" id="connectGoogleBtn" style="text-decoration: none; display: inline-flex; align-items: center;">
+            🔗 Connect Google Business Profile
+          </a>
+          <button class="btn btn-secondary" onclick="disconnectGoogle()" id="disconnectGoogleBtn" style="display: none;">
+            ❌ Disconnect
+          </button>
         </div>
       </div>
 
@@ -811,8 +1058,23 @@
           <label>Radius (miles)</label>
           <input type="number" id="trendRadius" value="10" min="1" max="50">
         </div>
+        <div class="form-group">
+          <label>Business Name (for GBP rank comparison)</label>
+          <input type="text" id="rankingBusinessName" placeholder="e.g., Malama Dental">
+        </div>
+        <div class="form-group">
+          <label>Website Domain (for organic rank comparison)</label>
+          <input type="text" id="rankingWebsiteDomain" placeholder="e.g., malama.dental">
+        </div>
+        <div class="form-group">
+          <label style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" id="useSerpApiRankings" />
+            Include GBP + website rankings (uses SerpAPI credits)
+      </label>
+          <small style="color:#777;">If unchecked, we’ll only use Google Trends keyword generation without ranking lookups.</small>
+        </div>
         <button class="btn" onclick="researchKeywords()">🔍 Research Keywords</button>
-      </div>
+    </div>
 
       <div class="card">
         <h3>Weekly Keyword Report</h3>
@@ -825,6 +1087,46 @@
       </div>
 
       <div id="trendsResults"></div>
+      </div>
+
+    <!-- Competitive Tab -->
+    <div id="competitive" class="tab-content">
+      <h2 class="section-title">Competitive Insights</h2>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Discover competitors (Places API)</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Query</label>
+            <input type="text" id="compQuery" placeholder="e.g., dentist near me" value="dentist" />
+          </div>
+          <div class="form-group">
+            <label>Radius (miles)</label>
+            <input type="number" id="compRadius" min="1" max="50" value="10" />
+          </div>
+          <div class="form-group">
+            <label>Limit</label>
+            <input type="number" id="compLimit" min="1" max="20" value="10" />
+          </div>
+          <div class="form-group">
+            <button class="btn" onclick="discoverCompetitorsUi(event)">🔎 Discover</button>
+            <button class="btn btn-secondary" onclick="refreshCompetitorsUi(event)">♻️ Refresh snapshots</button>
+          </div>
+        </div>
+        <div class="small-muted" style="margin-top:8px;">
+          Requires <span class="mono">GOOGLE_PLACES_API_KEY</span>. Discovery uses your GBP location as a bias when available.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Competitors</h3>
+        <div id="competitiveList"></div>
+      </div>
+
+      <div class="card" id="competitiveInsightsCard" style="display:none;">
+        <h3 style="margin-top:0;">Insights</h3>
+        <div id="competitiveInsights"></div>
+      </div>
     </div>
 
     <!-- Analyzer Tab -->
@@ -840,15 +1142,1173 @@
       </div>
     </div>
 
+    <!-- Team Tab -->
+    <div id="team" class="tab-content">
+      <h2 class="section-title">Team</h2>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Invite member</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="inviteEmail" placeholder="teammate@company.com" />
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="inviteRole">
+              <option value="STAFF">Staff</option>
+              <option value="ADMIN">Admin</option>
+              <option value="OWNER">Owner</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <button class="btn" onclick="inviteTeamMember(event)">➕ Invite</button>
+          </div>
+        </div>
+        <div id="teamInviteStatus" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Members</h3>
+        <div id="teamMembers"></div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settings" class="tab-content">
+      <h2 class="section-title">Settings</h2>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Business</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Business Name</label>
+            <input type="text" id="s_businessName" placeholder="e.g., Malama Dental">
+          </div>
+          <div class="form-group">
+            <label>Business Location</label>
+            <input type="text" id="s_businessLocation" placeholder="e.g., Long Valley, NJ">
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Website URL</label>
+            <input type="text" id="s_websiteUrl" placeholder="https://malama.dental">
+          </div>
+          <div class="form-group">
+            <label>Business Phone (used for CALL CTA)</label>
+            <input type="text" id="s_businessPhone" placeholder="(xxx) xxx-xxxx">
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Business Email</label>
+            <input type="text" id="s_businessEmail" placeholder="office@domain.com">
+          </div>
+          <div class="form-group">
+            <label>Notification Email To</label>
+            <input type="text" id="s_emailTo" placeholder="malamadentalgroup@gmail.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Scheduler</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:10px;">
+              <input type="checkbox" id="s_schedulerEnabled" />
+              Enable scheduled jobs
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Timezone</label>
+            <input type="text" id="s_schedulerTz" placeholder="America/New_York">
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Daily Reviews Cron (7pm ET default)</label>
+            <input type="text" id="s_dailyReviewsCron" placeholder="0 19 * * *">
+          </div>
+          <div class="form-group">
+            <label>Twice Weekly Post Cron</label>
+            <input type="text" id="s_twiceWeeklyPostCron" placeholder="0 10 * * 2,5">
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Monthly Executive Report Cron</label>
+            <input type="text" id="s_monthlyReportCron" placeholder="0 9 1 * *">
+          </div>
+          <div class="form-group">
+            <label>Avoid repeating topics from last N posts</label>
+            <input type="number" id="s_avoidRepeatLastNPosts" min="0" max="50" value="5">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Review Reply Generation</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Min Words</label>
+            <input type="number" id="s_reviewMinWords" min="0" max="400" value="25">
+          </div>
+          <div class="form-group">
+            <label>Max Words</label>
+            <input type="number" id="s_reviewMaxWords" min="10" max="400" value="150">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Signature (supports {businessName})</label>
+          <textarea id="s_reviewSignature" rows="3" placeholder="Warm regards,&#10;{businessName} Team"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Signature Variants JSON (optional; supports {businessName}/{businessPhone}/{businessEmail})</label>
+          <textarea id="s_reviewSignatureVariantsJson" rows="6" placeholder='{"default":{"en":"Warm regards,\\n{businessName} Team","es":"Saludos cordiales,\\nEquipo de {businessName}"},"negative":{"en":"Sincerely,\\n{businessName} Team"}}'></textarea>
+          <small style="color:#777;">Used to vary sign-offs by language and by negative reviews (rating ≤ 3 or negative sentiment).</small>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Reply Quality Controls (Templates + Voice)</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Voice Profile</label>
+            <select id="voiceSelect" onchange="onVoiceSelected()"></select>
+          </div>
+          <div class="form-group">
+            <label>Template</label>
+            <select id="templateSelect" onchange="onTemplateSelected()"></select>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px; display:flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="refreshReplyQcConfig()">🔄 Refresh Templates/Voices</button>
+          <button class="btn btn-secondary btn-sm" onclick="newVoiceProfile()">➕ New Voice</button>
+          <button class="btn btn-secondary btn-sm" onclick="newTemplate()">➕ New Template</button>
+        </div>
+
+        <div style="margin-top: 16px; border-top: 1px solid #eee; padding-top: 16px;">
+          <h4 style="margin: 0 0 10px 0;">Voice Profile Editor</h4>
+          <input type="hidden" id="voiceId" />
+          <div class="filter-row">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="voiceName" placeholder="Default" />
+            </div>
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="voiceEnabled" />
+                Enabled
+              </label>
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="form-group">
+              <label>Tone</label>
+              <input type="text" id="voiceTone" placeholder="warm, friendly, professional" />
+            </div>
+            <div class="form-group">
+              <label>Style</label>
+              <input type="text" id="voiceStyle" placeholder="concise and professional" />
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="form-group">
+              <label>Do List (JSON array)</label>
+              <textarea id="voiceDoListJson" rows="3" placeholder='["Thank reviewer","Invite to call if negative"]'></textarea>
+            </div>
+            <div class="form-group">
+              <label>Don't List (JSON array)</label>
+              <textarea id="voiceDontListJson" rows="3" placeholder='["Never confirm someone is a patient"]'></textarea>
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="form-group">
+              <label>Example Phrases (JSON array)</label>
+              <textarea id="voiceExamplePhrasesJson" rows="3" placeholder='["We appreciate your kind words"]'></textarea>
+            </div>
+            <div class="form-group">
+              <label>Banned Phrases (JSON array)</label>
+              <textarea id="voiceBannedPhrasesJson" rows="3" placeholder='["as your dentist","your appointment"]'></textarea>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap: wrap; margin-top: 8px;">
+            <button class="btn btn-sm" onclick="saveVoiceProfile(event)">💾 Save Voice</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteVoiceProfile(event)">🗑 Delete Voice</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; border-top: 1px solid #eee; padding-top: 16px;">
+          <h4 style="margin: 0 0 10px 0;">Template Editor</h4>
+          <input type="hidden" id="templateId" />
+          <div class="filter-row">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="templateName" placeholder="Default template" />
+            </div>
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="templateEnabled" />
+                Enabled
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <input type="number" id="templatePriority" value="0" />
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="form-group">
+              <label>Rating Min</label>
+              <input type="number" id="templateRatingMin" value="1" min="1" max="5" />
+            </div>
+            <div class="form-group">
+              <label>Rating Max</label>
+              <input type="number" id="templateRatingMax" value="5" min="1" max="5" />
+            </div>
+            <div class="form-group">
+              <label>Sentiment (optional)</label>
+              <input type="text" id="templateSentiment" placeholder="positive|neutral|negative" />
+            </div>
+            <div class="form-group">
+              <label>Language Code (optional)</label>
+              <input type="text" id="templateLanguageCode" placeholder="en, es, fr, en-US" />
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="form-group">
+              <label>Topics JSON (optional; JSON array)</label>
+              <textarea id="templateTopicsJson" rows="2" placeholder='["billing","wait time"]'></textarea>
+            </div>
+            <div class="form-group">
+              <label>Variant Hints JSON (optional)</label>
+              <textarea id="templateVariantHintsJson" rows="2" placeholder='{"A":"More concise","B":"More empathetic"}'></textarea>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Instructions (optional)</label>
+            <textarea id="templateInstructions" rows="3" placeholder="Add any extra rules for this template..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Body Template (optional; supports {reviewerFirstName}, {businessName}, {topics})</label>
+            <textarea id="templateBodyTemplate" rows="4" placeholder="Dear {reviewerFirstName}, ..."></textarea>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap: wrap; margin-top: 8px;">
+            <button class="btn btn-sm" onclick="saveTemplate(event)">💾 Save Template</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTemplate(event)">🗑 Delete Template</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">GMB Post Generation</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>Max Words for Posts</label>
+            <input type="number" id="s_gmbPostMaxWords" min="10" max="400" value="150">
+          </div>
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:10px;">
+              <input type="checkbox" id="s_defaultUseSerpApiRankings" />
+              Default: include rankings in keyword research (uses SerpAPI)
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" id="s_monthlyReportUseSerpApiRankings" />
+            Monthly report: include rankings (uses SerpAPI)
+          </label>
+        </div>
+      </div>
+
+      <button class="btn" onclick="saveSettings(event)">💾 Save Settings</button>
+      <button class="btn btn-secondary" onclick="loadSettings()">↩︎ Reload</button>
+      <div id="settingsStatus" style="margin-top: 12px;"></div>
+    </div>
+
     <script>
     let currentReview = null;
     let currentPost = null;
+    let selectedReviewIds = new Set();
+    let reviewsById = new Map();
+    let voiceProfiles = [];
+    let replyTemplates = [];
+    let membersForAssign = [];
 
     // Load stats on page load
     window.addEventListener('DOMContentLoaded', () => {
       loadStats();
       loadReviews();
+      checkGoogleConnection();
+      handleOAuthCallback();
+      loadRankingDefaults();
+      loadMe();
+      loadSettings(true);
+      loadMembersForAssign();
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('profileDropdown');
+        const btn = document.getElementById('profileBtn');
+        if (!dropdown || !btn) return;
+        if (dropdown.classList.contains('open')) {
+          const t = e.target;
+          if (!dropdown.contains(t) && !btn.contains(t)) dropdown.classList.remove('open');
+        }
+      });
     });
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function loadMembersForAssign() {
+      // Only owner/admin can call this endpoint; if forbidden, we just hide assignee controls.
+      try {
+        const res = await fetch('/api/business/members');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) {
+          membersForAssign = [];
+          return;
+        }
+        membersForAssign = Array.isArray(data.members) ? data.members : [];
+      } catch {
+        membersForAssign = [];
+      }
+    }
+
+    function updateBulkToolbar() {
+      const toolbar = document.getElementById('bulkToolbar');
+      const countEl = document.getElementById('selectedCount');
+      const selectAll = document.getElementById('selectAllVisible');
+      const count = selectedReviewIds.size;
+      if (countEl) countEl.textContent = String(count);
+      if (toolbar) toolbar.style.display = reviewsById.size > 0 ? 'flex' : 'none';
+      if (selectAll) {
+        const ids = Array.from(reviewsById.keys());
+        selectAll.checked = ids.length > 0 && ids.every((id) => selectedReviewIds.has(id));
+      }
+    }
+
+    function toggleReviewSelection(reviewId, checked) {
+      const id = Number(reviewId);
+      if (!Number.isFinite(id)) return;
+      if (checked) selectedReviewIds.add(id);
+      else selectedReviewIds.delete(id);
+      updateBulkToolbar();
+    }
+
+    function toggleSelectAllVisible(checked) {
+      const ids = Array.from(reviewsById.keys());
+      ids.forEach((id) => {
+        if (checked) selectedReviewIds.add(id);
+        else selectedReviewIds.delete(id);
+        const cb = document.getElementById(`sel-${id}`);
+        if (cb) cb.checked = !!checked;
+      });
+      updateBulkToolbar();
+    }
+
+    function clearSelection() {
+      Array.from(selectedReviewIds).forEach((id) => {
+        const cb = document.getElementById(`sel-${id}`);
+        if (cb) cb.checked = false;
+      });
+      selectedReviewIds = new Set();
+      updateBulkToolbar();
+    }
+
+    function getSelectedReviewIds() {
+      return Array.from(selectedReviewIds);
+    }
+
+    function updateOverdueApprovals(reviews) {
+      const el = document.getElementById('overdueApprovals');
+      if (!el) return;
+      const now = Date.now();
+      const overdue = (reviews || []).filter((r) => {
+        if (r.status !== 'Needs Approval') return false;
+        if (r.repliedAt) return false;
+        const since = r.needsApprovalSince || r.lastAnalyzedAt || r.createTime;
+        const t = since ? new Date(since).getTime() : 0;
+        return t > 0 && (now - t) >= (24 * 60 * 60 * 1000);
+      });
+      if (overdue.length === 0) {
+        el.textContent = '';
+        return;
+      }
+      const oldestMs = Math.max(...overdue.map((r) => {
+        const since = r.needsApprovalSince || r.lastAnalyzedAt || r.createTime;
+        return now - new Date(since).getTime();
+      }));
+      const oldestHours = Math.floor(oldestMs / (1000 * 60 * 60));
+      el.textContent = `Overdue approvals: ${overdue.length} (oldest ~${oldestHours}h)`;
+    }
+
+    async function bulkApproveAndPost() {
+      const ids = getSelectedReviewIds();
+      if (ids.length === 0) {
+        showWarning('Select at least one review first.', 'Bulk Approve & Post');
+        return;
+      }
+      if (!confirm(`Approve and post replies for ${ids.length} selected review(s)?`)) return;
+      try {
+        const res = await fetch('/api/reviews/bulk/approve-and-post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewIds: ids }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || data?.message || 'Bulk approve+post failed');
+        const c = data?.counts || {};
+        showSuccess(`Posted: ${c.posted || 0}, skipped: ${c.skipped || 0}, failed: ${c.failed || 0}`, 'Bulk Approve & Post');
+        clearSelection();
+        await loadReviews();
+        await loadStats();
+      } catch (e) {
+        showError(e.message || 'Bulk approve+post failed', 'Bulk Approve & Post');
+      }
+    }
+
+    async function bulkCopyDrafts() {
+      const ids = getSelectedReviewIds();
+      if (ids.length === 0) {
+        showWarning('Select at least one review first.', 'Copy Drafts');
+        return;
+      }
+      const blocks = [];
+      for (const id of ids) {
+        const r = reviewsById.get(id);
+        if (!r) continue;
+        const header = `${r.authorName} | ${r.rating}★ | ${new Date(r.createTime).toLocaleDateString()}`;
+        const draft = r.replyDraft ? String(r.replyDraft) : '(no draft)';
+        blocks.push(`${header}\n${draft}`);
+      }
+      const text = blocks.join('\n\n' + '-'.repeat(60) + '\n\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        showSuccess(`Copied ${blocks.length} draft(s) to clipboard.`, 'Copy Drafts');
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        showSuccess(`Copied ${blocks.length} draft(s) to clipboard.`, 'Copy Drafts');
+      }
+    }
+
+    function renderAssigneeHtml(review) {
+      if (!Array.isArray(membersForAssign) || membersForAssign.length === 0) return '';
+      const assigned = review.assignedToUserId || '';
+      const opts = [
+        `<option value="">Unassigned</option>`,
+        ...membersForAssign.map((m) => {
+          const label = escapeHtml(m.name || m.email || m.userId || 'Member');
+          const selected = String(m.userId) === String(assigned) ? 'selected' : '';
+          return `<option value="${escapeHtml(m.userId)}" ${selected}>${label}</option>`;
+        }),
+      ].join('');
+      return `
+        <div style="margin-top: 10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="badge badge-info">Assignee</span>
+          <select onchange="assignReview(${review.id}, this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #e0e0e0;">
+            ${opts}
+          </select>
+        </div>
+      `;
+    }
+
+    async function assignReview(reviewId, userId) {
+      try {
+        const assignedToUserId = userId ? String(userId) : null;
+        const res = await fetch(`/api/reviews/${reviewId}/assign`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ assignedToUserId }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || data?.message || 'Failed to assign');
+        showSuccess('Assignment updated', 'Assignee');
+      } catch (e) {
+        showError(e.message || 'Failed to assign', 'Assignee');
+      }
+    }
+
+    function diffLines(oldText, newText) {
+      const a = String(oldText || '').split('\n');
+      const b = String(newText || '').split('\n');
+      const n = a.length;
+      const m = b.length;
+      const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+      for (let i = n - 1; i >= 0; i--) {
+        for (let j = m - 1; j >= 0; j--) {
+          dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+        }
+      }
+      const out = [];
+      let i = 0, j = 0;
+      while (i < n && j < m) {
+        if (a[i] === b[j]) {
+          out.push({ t: 'same', v: a[i] });
+          i++; j++;
+        } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+          out.push({ t: 'del', v: a[i] });
+          i++;
+        } else {
+          out.push({ t: 'add', v: b[j] });
+          j++;
+        }
+      }
+      while (i < n) out.push({ t: 'del', v: a[i++] });
+      while (j < m) out.push({ t: 'add', v: b[j++] });
+      return out;
+    }
+
+    function openGenericModal(title, bodyHtml) {
+      closeGenericModal();
+      const backdrop = document.createElement('div');
+      backdrop.id = 'genericModalBackdrop';
+      backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; animation: fadeIn 0.2s ease-out;';
+      const modal = document.createElement('div');
+      modal.id = 'genericModalContainer';
+      modal.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 22px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10000; max-width: 900px; width: 92%; max-height: 85vh; overflow-y: auto; animation: modalSlideIn 0.3s ease-out;';
+      modal.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <h3 style="margin:0;">${escapeHtml(title)}</h3>
+          <button class="btn btn-secondary btn-sm" type="button" onclick="closeGenericModal()">Close</button>
+        </div>
+        <div style="margin-top: 14px;">${bodyHtml}</div>
+      `;
+      backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeGenericModal(); });
+      document.body.appendChild(backdrop);
+      document.body.appendChild(modal);
+    }
+
+    function closeGenericModal() {
+      const backdrop = document.getElementById('genericModalBackdrop');
+      const modal = document.getElementById('genericModalContainer');
+      if (backdrop) {
+        backdrop.style.animation = 'fadeOut 0.2s ease-out forwards';
+        setTimeout(() => backdrop.remove(), 200);
+      }
+      if (modal) {
+        modal.style.animation = 'modalSlideOut 0.2s ease-out forwards';
+        setTimeout(() => modal.remove(), 200);
+      }
+    }
+
+    async function openHistory(reviewId) {
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}/versions`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to load history');
+        const versions = Array.isArray(data.versions) ? data.versions : [];
+        const rows = versions.map((v) => {
+          const who = v.createdBy?.name || v.createdBy?.email || (v.createdByUserId ? String(v.createdByUserId).slice(0, 8) : '—');
+          const when = v.createdAt ? new Date(v.createdAt).toLocaleString() : '';
+          const label = `${v.source || 'unknown'} • ${who} • ${when}`;
+          return `
+            <div class="card" style="margin-bottom: 12px;">
+              <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div>
+                  <div style="font-weight:800;">${escapeHtml(label)}</div>
+                  <div class="small-muted">${escapeHtml(v.note || '')}</div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn btn-secondary btn-sm" onclick="viewDiff(${reviewId}, '${v.id}')">Diff</button>
+                  <button class="btn btn-success btn-sm" onclick="restoreVersion(${reviewId}, '${v.id}')">Restore</button>
+                </div>
+              </div>
+              <div class="reply-draft" style="margin-top:10px; white-space: pre-wrap;">${escapeHtml((v.text || '').slice(0, 500))}${(v.text || '').length > 500 ? '…' : ''}</div>
+            </div>
+          `;
+        }).join('');
+        openGenericModal(`Reply history (Review #${reviewId})`, rows || '<div class="empty-state"><p>No versions yet</p></div>');
+      } catch (e) {
+        showError(e.message || 'Failed to load history', 'History');
+      }
+    }
+
+    async function viewDiff(reviewId, versionId) {
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}/versions`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to load versions');
+        const versions = Array.isArray(data.versions) ? data.versions : [];
+        const v = versions.find((x) => x.id === versionId);
+        if (!v) throw new Error('Version not found');
+        const current = reviewsById.get(Number(reviewId)) || (await fetch(`/api/reviews/${reviewId}`).then(r => r.json()));
+        const ops = diffLines(v.text || '', current?.replyDraft || '');
+        const html = ops.map((op) => {
+          const cls = op.t === 'add' ? 'diff-add' : op.t === 'del' ? 'diff-del' : 'diff-same';
+          const prefix = op.t === 'add' ? '+ ' : op.t === 'del' ? '- ' : '  ';
+          return `<span class="diff-line ${cls}">${escapeHtml(prefix + op.v)}</span>`;
+        }).join('');
+        openGenericModal('Diff (version → current)', `<pre class="diff-pre mono">${html}</pre>`);
+      } catch (e) {
+        showError(e.message || 'Failed to render diff', 'Diff');
+      }
+    }
+
+    async function restoreVersion(reviewId, versionId) {
+      if (!confirm('Restore this version as the current draft?')) return;
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}/versions/${versionId}/restore`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || data?.message || 'Failed to restore');
+        showSuccess('Draft restored', 'History');
+        closeGenericModal();
+        await loadReviews();
+      } catch (e) {
+        showError(e.message || 'Failed to restore', 'History');
+      }
+    }
+
+    function toggleProfileMenu() {
+      const dropdown = document.getElementById('profileDropdown');
+      if (!dropdown) return;
+      dropdown.classList.toggle('open');
+    }
+
+    function openSettings() {
+      const dropdown = document.getElementById('profileDropdown');
+      if (dropdown) dropdown.classList.remove('open');
+      showTab('settings', null);
+      loadSettings();
+    }
+
+    async function doLogout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (e) {
+        // ignore
+      } finally {
+        window.location.href = '/login';
+      }
+    }
+
+    async function loadMe() {
+      try {
+        const res = await fetch('/api/me');
+        const data = await res.json();
+        if (!res.ok) return;
+
+        const user = data.user || {};
+        const memberships = Array.isArray(data.memberships) ? data.memberships : [];
+        const activeBusinessId = data.activeBusinessId;
+
+        const active = memberships.find((m) => m.businessId === activeBusinessId) || memberships[0];
+        const activeName = active?.business?.name || 'Business';
+        const activeRole = String(active?.role || 'STAFF').toUpperCase();
+
+        const name = user.name || user.email || 'User';
+        const email = user.email || '';
+        const initials = String(name).trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase()).join('') || 'U';
+
+        const avatarEl = document.getElementById('profileAvatar');
+        const nameEl = document.getElementById('profileName');
+        const emailEl = document.getElementById('profileEmail');
+        const pdNameEl = document.getElementById('pdName');
+        const pdEmailEl = document.getElementById('pdEmail');
+        if (avatarEl) avatarEl.textContent = initials;
+        if (nameEl) nameEl.textContent = name;
+        if (emailEl) emailEl.textContent = email;
+        if (pdNameEl) pdNameEl.textContent = name;
+        if (pdEmailEl) pdEmailEl.textContent = email;
+
+        // Header business name (prefer active business name)
+        const headerName = document.getElementById('headerBusinessName');
+        if (headerName) headerName.textContent = activeName;
+
+        // Business switcher
+        const wrap = document.getElementById('bizSwitcherWrap');
+        const sel = document.getElementById('bizSwitcher');
+        if (wrap && sel && memberships.length > 1) {
+          wrap.style.display = 'inline-flex';
+          sel.innerHTML = memberships.map((m) => {
+            const bid = m.businessId;
+            const label = m.business?.name || bid;
+            const selected = bid === activeBusinessId ? 'selected' : '';
+            return `<option value="${bid}" ${selected}>${label}</option>`;
+          }).join('');
+        } else if (wrap) {
+          wrap.style.display = 'none';
+        }
+
+        // Team tab visibility for Owner/Admin
+        const teamTab = document.getElementById('teamTab');
+        if (teamTab) {
+          teamTab.style.display = (activeRole === 'OWNER' || activeRole === 'ADMIN') ? 'block' : 'none';
+        }
+      } catch (e) {
+        // non-fatal
+      }
+    }
+
+    async function switchBusiness(event) {
+      try {
+        const businessId = event?.target?.value;
+        if (!businessId) return;
+        const res = await fetch('/api/business/switch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ businessId }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to switch business');
+        // simplest: reload to re-fetch everything scoped to new tenant
+        window.location.reload();
+      } catch (e) {
+        showError(e.message || 'Failed to switch business', 'Business');
+      }
+    }
+
+    async function inviteTeamMember(event) {
+      const btn = event?.target;
+      if (btn) btn.disabled = true;
+      const statusEl = document.getElementById('teamInviteStatus');
+      try {
+        const email = document.getElementById('inviteEmail')?.value?.trim();
+        const role = document.getElementById('inviteRole')?.value || 'STAFF';
+        if (!email) throw new Error('Email is required');
+        if (statusEl) statusEl.textContent = 'Sending invite...';
+        const res = await fetch('/api/business/invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, role }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to invite');
+        if (statusEl) statusEl.textContent = 'Invite sent.';
+        await loadTeam();
+      } catch (e) {
+        if (statusEl) statusEl.textContent = e.message || 'Invite failed';
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function loadTeam() {
+      const container = document.getElementById('teamMembers');
+      if (container) container.innerHTML = '<div style="color:#666;">Loading...</div>';
+      try {
+        const res = await fetch('/api/business/members');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to load members');
+        const members = Array.isArray(data.members) ? data.members : [];
+        const rows = members.map((m) => {
+          const safeEmail = (m.email || '').replace(/</g, '&lt;');
+          const safeName = (m.name || '').replace(/</g, '&lt;');
+          return `
+            <div style="display:flex; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:800;">${safeName || safeEmail}</div>
+                <div style="color:#666; font-size:0.9rem; word-break:break-all;">${safeEmail}</div>
+              </div>
+              <div>
+                <select onchange="updateMemberRole('${m.userId}', this.value)">
+                  <option value="STAFF" ${String(m.role).toUpperCase()==='STAFF'?'selected':''}>Staff</option>
+                  <option value="ADMIN" ${String(m.role).toUpperCase()==='ADMIN'?'selected':''}>Admin</option>
+                  <option value="OWNER" ${String(m.role).toUpperCase()==='OWNER'?'selected':''}>Owner</option>
+                </select>
+              </div>
+              <div>
+                <button class="btn btn-secondary btn-sm" onclick="removeMember('${m.userId}')">Remove</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        if (container) container.innerHTML = rows || '<div style="color:#666;">No members</div>';
+      } catch (e) {
+        if (container) container.innerHTML = `<div style="color:#b42318;">${e.message || 'Failed to load members'}</div>`;
+      }
+    }
+
+    async function updateMemberRole(userId, role) {
+      try {
+        const res = await fetch(`/api/business/members/${encodeURIComponent(userId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to update role');
+        showSuccess('Role updated', 'Team');
+      } catch (e) {
+        showError(e.message || 'Failed to update role', 'Team');
+      }
+    }
+
+    async function removeMember(userId) {
+      if (!confirm('Remove this member from the business?')) return;
+      try {
+        const res = await fetch(`/api/business/members/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to remove member');
+        await loadTeam();
+        showSuccess('Member removed', 'Team');
+      } catch (e) {
+        showError(e.message || 'Failed to remove member', 'Team');
+      }
+    }
+
+    async function loadSettings(silent = false) {
+      try {
+        const res = await fetch('/api/settings');
+        const data = await res.json();
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to load settings');
+        const s = data.settings;
+
+        // Header name
+        const headerName = document.getElementById('headerBusinessName');
+        if (headerName) headerName.textContent = s.businessName || 'Malama Dental';
+
+        // Form fields
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+        const setNum = (id, v) => { const el = document.getElementById(id); if (el) el.value = String(v ?? ''); };
+        const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+
+        setVal('s_businessName', s.businessName);
+        setVal('s_businessLocation', s.businessLocation);
+        setVal('s_websiteUrl', s.websiteUrl);
+        setVal('s_businessPhone', s.businessPhone || '');
+        setVal('s_businessEmail', s.businessEmail || '');
+        setVal('s_emailTo', s.emailTo);
+
+        setChk('s_schedulerEnabled', s.schedulerEnabled);
+        setVal('s_schedulerTz', s.schedulerTz);
+        setVal('s_dailyReviewsCron', s.dailyReviewsCron);
+        setVal('s_twiceWeeklyPostCron', s.twiceWeeklyPostCron);
+        setVal('s_monthlyReportCron', s.monthlyReportCron);
+        setNum('s_avoidRepeatLastNPosts', s.avoidRepeatLastNPosts);
+
+        setNum('s_reviewMinWords', s.reviewMinWords);
+        setNum('s_reviewMaxWords', s.reviewMaxWords);
+        setVal('s_reviewSignature', s.reviewSignature);
+        setVal('s_reviewSignatureVariantsJson', s.reviewSignatureVariantsJson || '');
+
+        setNum('s_gmbPostMaxWords', s.gmbPostMaxWords);
+        setChk('s_defaultUseSerpApiRankings', s.defaultUseSerpApiRankings);
+        setChk('s_monthlyReportUseSerpApiRankings', s.monthlyReportUseSerpApiRankings);
+
+        // Keyword research checkbox default
+        const researchChk = document.getElementById('useSerpApiRankings');
+        if (researchChk && researchChk.checked === false && researchChk.defaultChecked === false) {
+          researchChk.checked = !!s.defaultUseSerpApiRankings;
+        }
+
+        // Keep reply quality controls UI in sync
+        try { await refreshReplyQcConfig(true); } catch (_) {}
+
+        if (!silent) showSuccess('Settings loaded', 'Settings');
+      } catch (e) {
+        if (!silent) showError(e.message || 'Failed to load settings', 'Settings');
+      }
+    }
+
+    async function saveSettings(event) {
+      const btn = event?.target;
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> Saving...';
+      }
+
+      try {
+        const patch = {
+          businessName: document.getElementById('s_businessName')?.value?.trim(),
+          businessLocation: document.getElementById('s_businessLocation')?.value?.trim(),
+          websiteUrl: document.getElementById('s_websiteUrl')?.value?.trim(),
+          businessPhone: document.getElementById('s_businessPhone')?.value?.trim() || null,
+          businessEmail: document.getElementById('s_businessEmail')?.value?.trim() || null,
+          emailTo: document.getElementById('s_emailTo')?.value?.trim(),
+
+          schedulerEnabled: !!document.getElementById('s_schedulerEnabled')?.checked,
+          schedulerTz: document.getElementById('s_schedulerTz')?.value?.trim(),
+          dailyReviewsCron: document.getElementById('s_dailyReviewsCron')?.value?.trim(),
+          twiceWeeklyPostCron: document.getElementById('s_twiceWeeklyPostCron')?.value?.trim(),
+          monthlyReportCron: document.getElementById('s_monthlyReportCron')?.value?.trim(),
+          avoidRepeatLastNPosts: parseInt(document.getElementById('s_avoidRepeatLastNPosts')?.value || '5'),
+
+          reviewMinWords: parseInt(document.getElementById('s_reviewMinWords')?.value || '25'),
+          reviewMaxWords: parseInt(document.getElementById('s_reviewMaxWords')?.value || '150'),
+          reviewSignature: document.getElementById('s_reviewSignature')?.value || 'Warm regards,\n{businessName} Team',
+          reviewSignatureVariantsJson: (() => {
+            const v = document.getElementById('s_reviewSignatureVariantsJson')?.value;
+            const s = (v ?? '').trim();
+            return s.length === 0 ? null : v;
+          })(),
+
+          gmbPostMaxWords: parseInt(document.getElementById('s_gmbPostMaxWords')?.value || '150'),
+          defaultUseSerpApiRankings: !!document.getElementById('s_defaultUseSerpApiRankings')?.checked,
+          monthlyReportUseSerpApiRankings: !!document.getElementById('s_monthlyReportUseSerpApiRankings')?.checked,
+        };
+
+        // remove empty strings so we don’t overwrite with blanks accidentally
+        Object.keys(patch).forEach(k => {
+          if (patch[k] === '') delete patch[k];
+          if (typeof patch[k] === 'undefined') delete patch[k];
+        });
+
+        const res = await fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patch),
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to save settings');
+
+        // Update header + defaults immediately
+        await loadSettings(true);
+        showSuccess('Settings saved. Scheduler updated automatically.', 'Saved');
+      } catch (e) {
+        showError(e.message || 'Failed to save settings', 'Settings');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '💾 Save Settings';
+        }
+      }
+    }
+
+    async function refreshReplyQcConfig(silent = false) {
+      try {
+        const [voicesRes, templatesRes] = await Promise.all([
+          fetch('/api/reply-voices'),
+          fetch('/api/reply-templates'),
+        ]);
+        const voicesData = await voicesRes.json().catch(() => ({}));
+        const templatesData = await templatesRes.json().catch(() => ({}));
+        if (!voicesRes.ok) throw new Error(voicesData?.error || 'Failed to load voice profiles');
+        if (!templatesRes.ok) throw new Error(templatesData?.error || 'Failed to load templates');
+
+        voiceProfiles = Array.isArray(voicesData.voices) ? voicesData.voices : [];
+        replyTemplates = Array.isArray(templatesData.templates) ? templatesData.templates : [];
+
+        const voiceSel = document.getElementById('voiceSelect');
+        if (voiceSel) {
+          voiceSel.innerHTML = `<option value="">(none)</option>` + voiceProfiles
+            .map(v => `<option value="${escapeHtml(v.id)}">${escapeHtml(v.name || 'Unnamed')}${v.enabled ? '' : ' (disabled)'}</option>`)
+            .join('');
+        }
+        const tplSel = document.getElementById('templateSelect');
+        if (tplSel) {
+          tplSel.innerHTML = `<option value="">(none)</option>` + replyTemplates
+            .map(t => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name || 'Unnamed')} (p${Number(t.priority || 0)})${t.enabled ? '' : ' (disabled)'}</option>`)
+            .join('');
+        }
+
+        // Auto-select most recent items if nothing selected
+        if (voiceProfiles.length > 0 && voiceSel && !voiceSel.value) {
+          voiceSel.value = String(voiceProfiles[0].id);
+        }
+        if (replyTemplates.length > 0 && tplSel && !tplSel.value) {
+          tplSel.value = String(replyTemplates[0].id);
+        }
+        onVoiceSelected();
+        onTemplateSelected();
+
+        if (!silent) showSuccess('Templates/voices loaded', 'Reply QC');
+      } catch (e) {
+        if (!silent) showError(e.message || 'Failed to load templates/voices', 'Reply QC');
+      }
+    }
+
+    function onVoiceSelected() {
+      const sel = document.getElementById('voiceSelect');
+      const id = sel ? String(sel.value || '') : '';
+      const v = voiceProfiles.find(x => String(x.id) === id) || null;
+
+      const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+      const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+
+      setVal('voiceId', v?.id || '');
+      setVal('voiceName', v?.name || '');
+      setChk('voiceEnabled', v?.enabled !== false);
+      setVal('voiceTone', v?.tone || '');
+      setVal('voiceStyle', v?.style || '');
+      setVal('voiceDoListJson', v?.doListJson || '');
+      setVal('voiceDontListJson', v?.dontListJson || '');
+      setVal('voiceExamplePhrasesJson', v?.examplePhrasesJson || '');
+      setVal('voiceBannedPhrasesJson', v?.bannedPhrasesJson || '');
+    }
+
+    function onTemplateSelected() {
+      const sel = document.getElementById('templateSelect');
+      const id = sel ? String(sel.value || '') : '';
+      const t = replyTemplates.find(x => String(x.id) === id) || null;
+
+      const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+      const setNum = (id, v) => { const el = document.getElementById(id); if (el) el.value = String(v ?? ''); };
+      const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+
+      setVal('templateId', t?.id || '');
+      setVal('templateName', t?.name || '');
+      setChk('templateEnabled', t?.enabled !== false);
+      setNum('templatePriority', t?.priority ?? 0);
+      setNum('templateRatingMin', t?.ratingMin ?? 1);
+      setNum('templateRatingMax', t?.ratingMax ?? 5);
+      setVal('templateSentiment', t?.sentiment ?? '');
+      setVal('templateLanguageCode', t?.languageCode ?? '');
+      setVal('templateTopicsJson', t?.topicsJson ?? '');
+      setVal('templateVariantHintsJson', t?.variantHintsJson ?? '');
+      setVal('templateInstructions', t?.instructions ?? '');
+      setVal('templateBodyTemplate', t?.bodyTemplate ?? '');
+    }
+
+    function newVoiceProfile() {
+      const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+      const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+      setVal('voiceId', '');
+      setVal('voiceName', 'Default');
+      setChk('voiceEnabled', true);
+      setVal('voiceTone', 'warm, friendly, professional');
+      setVal('voiceStyle', 'concise and professional');
+      setVal('voiceDoListJson', '[]');
+      setVal('voiceDontListJson', '[]');
+      setVal('voiceExamplePhrasesJson', '[]');
+      setVal('voiceBannedPhrasesJson', '[]');
+    }
+
+    async function saveVoiceProfile(event) {
+      const btn = event?.target;
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Saving...'; }
+      try {
+        const id = document.getElementById('voiceId')?.value || '';
+        const body = {
+          name: document.getElementById('voiceName')?.value?.trim() || 'Default',
+          enabled: !!document.getElementById('voiceEnabled')?.checked,
+          tone: document.getElementById('voiceTone')?.value || '',
+          style: document.getElementById('voiceStyle')?.value || '',
+          doListJson: document.getElementById('voiceDoListJson')?.value || null,
+          dontListJson: document.getElementById('voiceDontListJson')?.value || null,
+          examplePhrasesJson: document.getElementById('voiceExamplePhrasesJson')?.value || null,
+          bannedPhrasesJson: document.getElementById('voiceBannedPhrasesJson')?.value || null,
+        };
+        const url = id ? `/api/reply-voices/${encodeURIComponent(id)}` : '/api/reply-voices';
+        const method = id ? 'PUT' : 'POST';
+        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to save voice');
+        await refreshReplyQcConfig(true);
+        showSuccess('Voice saved', 'Reply QC');
+      } catch (e) {
+        showError(e.message || 'Failed to save voice', 'Reply QC');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '💾 Save Voice'; }
+      }
+    }
+
+    async function deleteVoiceProfile(event) {
+      const id = document.getElementById('voiceId')?.value || '';
+      if (!id) { showWarning('Select a voice profile first', 'Reply QC'); return; }
+      if (!confirm('Delete this voice profile?')) return;
+      const btn = event?.target;
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Deleting...'; }
+      try {
+        const res = await fetch(`/api/reply-voices/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to delete voice');
+        await refreshReplyQcConfig(true);
+        newVoiceProfile();
+        showSuccess('Voice deleted', 'Reply QC');
+      } catch (e) {
+        showError(e.message || 'Failed to delete voice', 'Reply QC');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '🗑 Delete Voice'; }
+      }
+    }
+
+    function newTemplate() {
+      const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+      const setNum = (id, v) => { const el = document.getElementById(id); if (el) el.value = String(v ?? ''); };
+      const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+      setVal('templateId', '');
+      setVal('templateName', 'Default template');
+      setChk('templateEnabled', true);
+      setNum('templatePriority', 0);
+      setNum('templateRatingMin', 1);
+      setNum('templateRatingMax', 5);
+      setVal('templateSentiment', '');
+      setVal('templateLanguageCode', '');
+      setVal('templateTopicsJson', '[]');
+      setVal('templateVariantHintsJson', '');
+      setVal('templateInstructions', '');
+      setVal('templateBodyTemplate', '');
+    }
+
+    async function saveTemplate(event) {
+      const btn = event?.target;
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Saving...'; }
+      try {
+        const id = document.getElementById('templateId')?.value || '';
+        const body = {
+          name: document.getElementById('templateName')?.value?.trim() || 'Default template',
+          enabled: !!document.getElementById('templateEnabled')?.checked,
+          priority: parseInt(document.getElementById('templatePriority')?.value || '0'),
+          ratingMin: parseInt(document.getElementById('templateRatingMin')?.value || '1'),
+          ratingMax: parseInt(document.getElementById('templateRatingMax')?.value || '5'),
+          sentiment: (() => {
+            const s = (document.getElementById('templateSentiment')?.value || '').trim();
+            return s.length === 0 ? null : s;
+          })(),
+          languageCode: (() => {
+            const s = (document.getElementById('templateLanguageCode')?.value || '').trim();
+            return s.length === 0 ? null : s;
+          })(),
+          topicsJson: (() => {
+            const s = (document.getElementById('templateTopicsJson')?.value || '').trim();
+            return s.length === 0 ? null : s;
+          })(),
+          instructions: (() => {
+            const s = (document.getElementById('templateInstructions')?.value || '').trim();
+            return s.length === 0 ? null : document.getElementById('templateInstructions')?.value;
+          })(),
+          bodyTemplate: (() => {
+            const s = (document.getElementById('templateBodyTemplate')?.value || '').trim();
+            return s.length === 0 ? null : document.getElementById('templateBodyTemplate')?.value;
+          })(),
+          variantHintsJson: (() => {
+            const s = (document.getElementById('templateVariantHintsJson')?.value || '').trim();
+            return s.length === 0 ? null : s;
+          })(),
+        };
+        const url = id ? `/api/reply-templates/${encodeURIComponent(id)}` : '/api/reply-templates';
+        const method = id ? 'PUT' : 'POST';
+        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to save template');
+        await refreshReplyQcConfig(true);
+        showSuccess('Template saved', 'Reply QC');
+      } catch (e) {
+        showError(e.message || 'Failed to save template', 'Reply QC');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '💾 Save Template'; }
+      }
+    }
+
+    async function deleteTemplate(event) {
+      const id = document.getElementById('templateId')?.value || '';
+      if (!id) { showWarning('Select a template first', 'Reply QC'); return; }
+      if (!confirm('Delete this template?')) return;
+      const btn = event?.target;
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Deleting...'; }
+      try {
+        const res = await fetch(`/api/reply-templates/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to delete template');
+        await refreshReplyQcConfig(true);
+        newTemplate();
+        showSuccess('Template deleted', 'Reply QC');
+      } catch (e) {
+        showError(e.message || 'Failed to delete template', 'Reply QC');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '🗑 Delete Template'; }
+      }
+    }
 
     // Notification System
     function showNotification(type, title, message, duration = 5000) {
@@ -904,7 +2364,7 @@
       showNotification('warning', title, message);
     }
 
-    function showTab(tabName) {
+    function showTab(tabName, event) {
       // Hide all tabs
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
@@ -915,19 +2375,291 @@
 
       // Show selected tab
       document.getElementById(tabName).classList.add('active');
-      event.target.classList.add('active');
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
 
       // Load data for specific tabs
       if (tabName === 'trends') {
         viewTrends();
       } else if (tabName === 'posts') {
         listPosts();
+      } else if (tabName === 'competitive') {
+        loadCompetitive();
+      } else if (tabName === 'team') {
+        loadTeam();
+      }
+    }
+
+    async function loadCompetitive() {
+      try {
+        await loadCompetitiveList();
+      } catch (e) {
+        // non-fatal
+      }
+    }
+
+    async function loadCompetitiveList() {
+      const listEl = document.getElementById('competitiveList');
+      if (listEl) listEl.innerHTML = '<div style="color:#666;">Loading...</div>';
+      try {
+        const res = await fetch('/api/competitive/competitors');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to load competitors');
+        const competitors = Array.isArray(data.competitors) ? data.competitors : [];
+        if (competitors.length === 0) {
+          if (listEl) listEl.innerHTML = '<div style="color:#666;">No competitors yet. Use “Discover” above.</div>';
+          return;
+        }
+        const rows = competitors.map((c) => {
+          const name = escapeHtml(c.name || c.placeId);
+          const addr = escapeHtml(c.address || '');
+          const status = escapeHtml(c.status || 'active');
+          const locked = !!c.locked;
+          const badgeCls = status === 'active' ? 'badge-success' : 'badge-warning';
+          return `
+            <div class="review-item" style="margin-bottom: 12px;">
+              <div class="review-header">
+                <div style="min-width:0;">
+                  <div style="font-weight:800;">${name}</div>
+                  <div class="small-muted" style="word-break:break-word;">${addr}</div>
+                </div>
+                <div>
+                  <span class="badge ${badgeCls}">${status}</span>
+                  <span class="badge badge-info">${locked ? 'locked' : 'unlocked'}</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
+                <button class="btn btn-secondary btn-sm" onclick="showCompetitorInsights('${c.id}')">📈 View insights</button>
+                <button class="btn btn-secondary btn-sm" onclick="toggleCompetitorLock('${c.id}', ${locked ? 'false' : 'true'})">${locked ? '🔓 Unlock' : '🔒 Lock'}</button>
+                <button class="btn btn-secondary btn-sm" onclick="toggleCompetitorStatus('${c.id}', '${status === 'active' ? 'hidden' : 'active'}')">${status === 'active' ? '🙈 Hide' : '👁️ Activate'}</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        if (listEl) listEl.innerHTML = rows;
+      } catch (e) {
+        if (listEl) listEl.innerHTML = `<div style="color:#b42318;">${escapeHtml(e.message || 'Failed to load competitors')}</div>`;
+      }
+    }
+
+    async function discoverCompetitorsUi(event) {
+      const btn = event?.target;
+      if (btn) btn.disabled = true;
+      try {
+        const query = document.getElementById('compQuery')?.value?.trim();
+        const radiusMiles = parseInt(document.getElementById('compRadius')?.value || '10');
+        const limit = parseInt(document.getElementById('compLimit')?.value || '10');
+        if (!query) throw new Error('Query is required');
+        const res = await fetch('/api/competitive/discover', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, radiusMiles, limit }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Discovery failed (Owner/Admin only?)');
+        showSuccess(`Discovered/upserted ${data.upserted || 0} competitor(s).`, 'Competitive');
+        await loadCompetitiveList();
+      } catch (e) {
+        showError(e.message || 'Discovery failed', 'Competitive');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function refreshCompetitorSnapshot(competitorId) {
+      try {
+        const res = await fetch('/api/competitive/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ competitorId }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to refresh snapshot');
+        showSuccess(`Snapshot created successfully! Refreshing insights...`, 'Competitive');
+        // Reload insights
+        await showCompetitorInsights(competitorId);
+      } catch (e) {
+        showError(e.message || 'Failed to create snapshot', 'Competitive');
+      }
+    }
+
+    async function refreshCompetitorsUi(event) {
+      const btn = event?.target;
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch('/api/competitive/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Refresh failed (Owner/Admin only?)');
+        showSuccess(`Refresh complete (${data.count || 0} processed).`, 'Competitive');
+      } catch (e) {
+        showError(e.message || 'Refresh failed', 'Competitive');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function toggleCompetitorLock(id, locked) {
+      try {
+        const res = await fetch(`/api/competitive/competitors/${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ locked }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Update failed');
+        await loadCompetitiveList();
+      } catch (e) {
+        showError(e.message || 'Update failed', 'Competitive');
+      }
+    }
+
+    async function toggleCompetitorStatus(id, status) {
+      try {
+        const res = await fetch(`/api/competitive/competitors/${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Update failed');
+        await loadCompetitiveList();
+      } catch (e) {
+        showError(e.message || 'Update failed', 'Competitive');
+      }
+    }
+
+    async function showCompetitorInsights(id) {
+      const card = document.getElementById('competitiveInsightsCard');
+      const el = document.getElementById('competitiveInsights');
+      if (card) card.style.display = 'block';
+      // Scroll to insights card
+      setTimeout(() => card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+      if (el) el.innerHTML = '<div style="color:#666;">Loading...</div>';
+      try {
+        const res = await fetch(`/api/competitive/insights?competitorId=${encodeURIComponent(id)}&windowDays=7`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const errorMsg = data?.error || data?.message || `HTTP ${res.status}: ${res.statusText}`;
+          console.error('Insights API error:', { status: res.status, data });
+          throw new Error(errorMsg);
+        }
+        if (!data?.success) {
+          throw new Error(data?.error || 'Failed to load insights');
+        }
+
+        const comp = data.competitor || {};
+        const snap = data.latestSnapshot || {};
+        const vel = data.velocity?.velocityWindow || {};
+        const overlap = data.keywordOverlap || {};
+        const themes = Array.isArray(data.themes) ? data.themes : [];
+        
+        // Parse website analysis if available
+        let websiteAnalysis = null;
+        if (snap.websiteAnalysisJson) {
+          try {
+            websiteAnalysis = JSON.parse(snap.websiteAnalysisJson);
+          } catch {
+            websiteAnalysis = null;
+          }
+        }
+
+        const themeRows = themes.slice(0, 8).map((t) => {
+          const examples = t.examplesJson ? (() => { try { return JSON.parse(t.examplesJson); } catch { return []; } })() : [];
+          return `
+            <div style="padding:10px 0; border-bottom:1px solid #eee;">
+              <div style="font-weight:800;">${escapeHtml(t.theme)} <span class="small-muted">(${escapeHtml(t.sentiment || 'neutral')})</span></div>
+              ${examples.length ? `<div class="small-muted">${examples.map((e) => escapeHtml(e)).join(' • ')}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+
+        const overlapList = Array.isArray(overlap?.overlap) ? overlap.overlap : [];
+        const jacc = typeof overlap?.jaccard === 'number' ? overlap.jaccard : 0;
+        // Check if snapshot exists and has actual data (not just empty object)
+        const hasSnapshot = snap && Object.keys(snap).length > 0 && (snap.rating != null || snap.userRatingsTotal != null);
+        const hasVelocity = vel && (typeof vel.perDay === 'number' || typeof vel.deltaCount === 'number');
+        const hasOverlap = overlap && (overlapList.length > 0 || jacc > 0);
+
+        if (el) {
+          el.innerHTML = `
+            <div class="card" style="box-shadow:none; border:1px solid #eee;">
+              <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div>
+                  <div style="font-weight:900; font-size:1.1rem;">${escapeHtml(comp.name || 'Unknown')}</div>
+                  <div class="small-muted">${escapeHtml(comp.address || '')}</div>
+                </div>
+                <div>
+                  ${hasSnapshot ? `
+                    <span class="badge badge-primary">Rating: ${typeof snap.rating === 'number' ? snap.rating.toFixed(1) : '—'}</span>
+                    <span class="badge badge-info">Reviews: ${snap.userRatingsTotal ?? '—'}</span>
+                  ` : '<span class="badge badge-warning">No snapshot yet</span>'}
+                </div>
+              </div>
+              ${hasSnapshot ? `
+              <div style="margin-top:10px;">
+                <span class="badge badge-info">Velocity</span>
+                <span class="small-muted">${hasVelocity ? `${typeof vel.perDay === 'number' ? vel.perDay.toFixed(2) : '—'} reviews/day (Δ ${vel.deltaCount ?? '—'} over ${vel.deltaDays ? vel.deltaDays.toFixed(1) : '—'} days)` : '— (need multiple snapshots)'}</span>
+              </div>
+              <div style="margin-top:10px;">
+                <span class="badge badge-info">Keyword overlap</span>
+                <span class="small-muted">${hasOverlap ? `Jaccard: ${(jacc * 100).toFixed(0)}% • Overlap: ${overlapList.slice(0, 12).map((k) => escapeHtml(k)).join(', ')}` : '— (no overlap data)'}</span>
+              </div>
+              ${snap.websiteRating != null ? `
+              <div style="margin-top:10px;">
+                <span class="badge badge-info">Website Quality</span>
+                <span class="small-muted">${snap.websiteRating}/100</span>
+                ${websiteAnalysis ? `
+                  <details style="margin-top:8px;">
+                    <summary style="cursor:pointer; font-weight:700; color:#0066cc;">View detailed analysis</summary>
+                    <div style="margin-top:8px; padding:12px; background:#f7f7f7; border-radius:6px; font-size:0.9rem;">
+                      <div style="margin-bottom:8px;"><strong>SEO:</strong> ${websiteAnalysis.seo?.score || 0}/30 ${websiteAnalysis.seo?.details?.length ? `• ${websiteAnalysis.seo.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
+                      <div style="margin-bottom:8px;"><strong>Content:</strong> ${websiteAnalysis.content?.score || 0}/30 ${websiteAnalysis.content?.details?.length ? `• ${websiteAnalysis.content.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
+                      <div style="margin-bottom:8px;"><strong>Features:</strong> ${websiteAnalysis.features?.score || 0}/20 ${websiteAnalysis.features?.details?.length ? `• ${websiteAnalysis.features.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
+                      <div style="margin-bottom:8px;"><strong>UX:</strong> ${websiteAnalysis.ux?.score || 0}/20 ${websiteAnalysis.ux?.details?.length ? `• ${websiteAnalysis.ux.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
+                      ${websiteAnalysis.recommendations?.length ? `
+                        <div style="margin-top:10px;"><strong>Recommendations:</strong>
+                          <ul style="margin:6px 0 0 20px; padding:0;">
+                            ${websiteAnalysis.recommendations.slice(0, 3).map((r) => `<li>${escapeHtml(r)}</li>`).join('')}
+                          </ul>
+                        </div>
+                      ` : ''}
+                    </div>
+                  </details>
+                ` : ''}
+              </div>
+              ` : ''}
+              <div style="margin-top:14px;">
+                <div style="font-weight:900;">Common themes</div>
+                ${themeRows || '<div class="small-muted">No themes yet (need snapshots with review text).</div>'}
+              </div>
+              ` : `
+              <div style="margin-top:16px; padding:16px; background:#f7f7f7; border-radius:8px;">
+                <div style="margin-bottom:8px; font-weight:800;">No insights data available</div>
+                <div class="small-muted" style="margin-bottom:12px;">You need to create snapshots first to generate insights (ratings, velocity, themes, keyword overlap).</div>
+                <button class="btn btn-secondary btn-sm" onclick="refreshCompetitorSnapshot('${id}')">📊 Create Snapshot</button>
+              </div>
+              `}
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error('Failed to load competitor insights:', e);
+        const errorMsg = e?.message || String(e) || 'Failed to load insights';
+        if (el) el.innerHTML = `<div style="color:#b42318;">${escapeHtml(errorMsg)}</div>`;
+        showError(errorMsg, 'Competitive Insights');
       }
     }
 
     async function loadStats() {
       try {
-        const reviews = await fetch('/api/reviews').then(r => r.json());
+        const res = await fetch('/api/reviews');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data?.error || data?.message || `Failed to load reviews (${res.status})`;
+          throw new Error(msg);
+        }
+        const reviews = Array.isArray(data) ? data : Array.isArray(data?.reviews) ? data.reviews : [];
         const total = reviews.length;
         const average = reviews.reduce((sum, r) => sum + r.rating, 0) / total || 0;
         
@@ -958,6 +2690,49 @@
       }
     }
 
+    function renderVariantsHtml(review) {
+      const v = review && review.replyVariants;
+      if (!v || !v.A || !v.B) return '';
+      const selected = String(v.selected || '').toUpperCase();
+      const badge = selected === 'A' || selected === 'B' ? selected : '—';
+      const qcBadge = (qc) => {
+        if (!qc) return '<span class="badge badge-warning">QC unknown</span>';
+        if (qc.blocked) return '<span class="badge badge-danger">Blocked</span>';
+        return qc.ok ? '<span class="badge badge-success">QC pass</span>' : '<span class="badge badge-warning">QC needs review</span>';
+      };
+      const shortIssues = (qc) => {
+        const issues = Array.isArray(qc?.issues) ? qc.issues : [];
+        if (issues.length === 0) return '';
+        return `<div class="small-muted" style="margin-top:6px;">${issues.slice(0, 3).map(x => escapeHtml(x)).join(' • ')}</div>`;
+      };
+
+      return `
+        <div style="margin-top: 12px; padding: 12px; border: 1px solid #e6e6ff; border-radius: 8px; background: #f7f7ff;">
+          <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            <div>
+              <strong>Variants:</strong>
+              <span class="badge badge-primary">Selected ${badge}</span>
+              ${review.replyLanguageCode ? `<span class="badge badge-info">${escapeHtml(review.replyLanguageCode)}</span>` : ''}
+            </div>
+            <div style="display:flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="selectVariant(${review.id}, 'A')">Select A</button>
+              <button class="btn btn-secondary btn-sm" onclick="selectVariant(${review.id}, 'B')">Select B</button>
+            </div>
+          </div>
+          <details style="margin-top: 10px;">
+            <summary style="cursor:pointer; font-weight:700;">Variant A ${qcBadge(v.A.qc)}</summary>
+            <div class="reply-draft" style="margin-top: 8px; white-space: pre-wrap;">${escapeHtml(v.A.text || '')}</div>
+            ${shortIssues(v.A.qc)}
+          </details>
+          <details style="margin-top: 10px;">
+            <summary style="cursor:pointer; font-weight:700;">Variant B ${qcBadge(v.B.qc)}</summary>
+            <div class="reply-draft" style="margin-top: 8px; white-space: pre-wrap;">${escapeHtml(v.B.text || '')}</div>
+            ${shortIssues(v.B.qc)}
+          </details>
+        </div>
+      `;
+    }
+
     async function loadReviews() {
       const status = document.getElementById('filterStatus')?.value || '';
       const rating = document.getElementById('filterRating')?.value || '';
@@ -971,18 +2746,45 @@
         if (sentiment) params.append('sentiment', sentiment);
         url += params.toString();
 
-        const reviews = await fetch(url).then(r => r.json());
+        const res = await fetch(url);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data?.error || data?.message || `Failed to load reviews (${res.status})`;
+          // If session expired, bounce to login
+          if (res.status === 401) {
+            window.location.href = '/login';
+            return;
+          }
+          throw new Error(msg);
+        }
+        const reviews = Array.isArray(data) ? data : Array.isArray(data?.reviews) ? data.reviews : null;
         const listEl = document.getElementById('reviewsList');
+
+        if (!Array.isArray(reviews)) {
+          listEl.innerHTML = `<div class="alert alert-error">Error loading reviews: Unexpected response. Try refreshing, or switch business.</div>`;
+          reviewsById = new Map();
+          updateBulkToolbar();
+          return;
+        }
 
         if (reviews.length === 0) {
           listEl.innerHTML = '<div class="empty-state"><p>No reviews found</p></div>';
+          reviewsById = new Map();
+          updateBulkToolbar();
           return;
         }
+
+        // Cache for bulk actions / diff view
+        reviewsById = new Map();
+        (reviews || []).forEach((r) => reviewsById.set(Number(r.id), r));
+        updateBulkToolbar();
+        updateOverdueApprovals(reviews);
 
         listEl.innerHTML = reviews.map(review => `
           <div class="review-item">
             <div class="review-header">
               <div>
+                <input type="checkbox" id="sel-${review.id}" style="margin-right: 10px;" onchange="toggleReviewSelection(${review.id}, this.checked)" ${selectedReviewIds.has(Number(review.id)) ? 'checked' : ''} />
                 <span class="review-author">${review.authorName}</span>
                 <span class="review-date"> - ${new Date(review.createTime).toLocaleDateString()}</span>
               </div>
@@ -998,13 +2800,22 @@
                 <span class="badge badge-${review.status === 'Replied' ? 'success' : review.status === 'Auto-Approved' ? 'primary' : review.status === 'Needs Approval' ? 'warning' : 'danger'}">${review.status}</span>
                 ${review.repliedAt ? `<span class="badge badge-success">Replied ${new Date(review.repliedAt).toLocaleDateString()}</span>` : ''}
               </div>
+              ${Array.isArray(review.whyFlagged) && review.whyFlagged.length > 0 ? `
+                <div style="margin-bottom: 10px;">
+                  <span class="badge badge-warning">Why flagged</span>
+                  <span class="small-muted">${review.whyFlagged.map(x => escapeHtml(x)).join(' • ')}</span>
+                </div>
+              ` : ''}
+              ${renderAssigneeHtml(review)}
               ${review.replyDraft ? `
                 <div class="reply-section">
                   <strong>Reply Draft:</strong>
                   <div class="reply-draft" id="draft-${review.id}">${review.replyDraft}</div>
+                  ${renderVariantsHtml(review)}
                   ${!review.repliedAt ? `
                     <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
                       <button class="btn" onclick="editReply(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">✏️ Edit Reply</button>
+                      <button class="btn btn-secondary" onclick="openHistory(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">🕒 History</button>
                       <button class="btn btn-secondary" onclick="regenerateReplyForReview(${review.id}, event)" style="font-size: 0.9rem; padding: 8px 16px;" id="regenerateBtn-${review.id}">🔄 Regenerate Reply</button>
                       ${review.status === 'Auto-Approved' ? `
                         <button class="btn btn-success" onclick="postReplyById(${review.id})" style="font-size: 0.9rem; padding: 8px 16px;">📤 Post Reply</button>
@@ -1029,7 +2840,23 @@
       }
     }
 
-    async function fetchNewReviews() {
+    async function selectVariant(reviewId, selected) {
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}/select-variant`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ selected }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || 'Failed to select variant');
+        showSuccess(`Selected variant ${selected} and updated reply draft.`, 'Variant Selected');
+        await loadReviews();
+      } catch (e) {
+        showError(e.message || 'Failed to select variant', 'Variant Selection Error');
+      }
+    }
+
+    async function fetchNewReviews(event) {
       const btn = event.target;
       btn.disabled = true;
       btn.innerHTML = '<span class="loading"></span> Fetching...';
@@ -1039,14 +2866,18 @@
         const data = await response.json();
         
         if (response.ok) {
-          showSuccess(`Fetched ${data.count || 0} new reviews!`, 'Reviews Updated');
+          const message = data.message || `Fetched ${data.count || 0} new reviews! Processed ${data.processed || 0}, analyzed ${data.analyzed || 0}.`;
+          showSuccess(message, 'Reviews Updated');
           loadReviews();
           loadStats();
         } else {
-          showError(data.error || 'Failed to fetch reviews', 'Fetch Error');
+          const errorMsg = data.message || data.error || 'Failed to fetch reviews';
+          showError(errorMsg, 'Fetch Error');
         }
       } catch (error) {
-        showError(error.message, 'Fetch Error');
+        const errorMsg = error.message || 'Network error - could not connect to server';
+        showError(errorMsg, 'Fetch Error');
+        console.error('Fetch error:', error);
       } finally {
         btn.disabled = false;
         btn.innerHTML = '📥 Fetch New Reviews';
@@ -1133,7 +2964,7 @@
         resultsEl.innerHTML = matches.map(review => `
           <div class="review-item" onclick="selectReview(${review.id})">
             <strong>${review.authorName}</strong> - ${review.rating}⭐ (${new Date(review.createTime).toLocaleDateString()})
-            ${review.comment ? `<div style="margin-top: 10px; color: #666;">${review.comment.substring(0, 100)}...</div>` : ''}
+            ${review.comment ? '<div style="margin-top: 10px; color: #666;">' + review.comment.substring(0, 100) + '...</div>' : ''}
           </div>
         `).join('');
       } catch (error) {
@@ -1434,6 +3265,7 @@
         <h3 style="margin-bottom: 15px; margin-top: 0;">Edit Reply Draft</h3>
         <textarea id="editReplyText" style="width: 100%; min-height: 150px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-family: inherit; font-size: 1rem; resize: vertical;" placeholder="Enter reply text...">${currentDraft.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
         <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn btn-secondary" id="historyEditBtn" type="button">🕒 History</button>
           <button class="btn btn-secondary" id="cancelEditBtn" type="button">Cancel</button>
           <button class="btn btn-success" id="saveEditBtn" type="button">💾 Save Changes</button>
         </div>
@@ -1442,9 +3274,11 @@
       // Add event listeners
       const cancelBtn = editDiv.querySelector('#cancelEditBtn');
       const saveBtn = editDiv.querySelector('#saveEditBtn');
+      const historyBtn = editDiv.querySelector('#historyEditBtn');
       
       cancelBtn.addEventListener('click', () => closeEditModal());
       saveBtn.addEventListener('click', () => saveEditedReply(reviewId));
+      historyBtn.addEventListener('click', () => openHistory(reviewId));
       
       // Close on backdrop click
       backdrop.addEventListener('click', (e) => {
@@ -1692,9 +3526,23 @@
     async function listPosts() {
       try {
         const response = await fetch('/api/posts');
-        const posts = await response.json();
+        const data = await response.json();
 
         const listEl = document.getElementById('postsList');
+        
+        // Handle different response formats - ensure posts is always an array
+        let posts = [];
+        if (data && Array.isArray(data)) {
+          posts = data;
+        } else if (data && Array.isArray(data.posts)) {
+          posts = data.posts;
+        } else if (data && data.posts && !Array.isArray(data.posts)) {
+          // If posts is a single object, wrap it in an array
+          posts = [data.posts];
+        } else if (data && data.localPosts && Array.isArray(data.localPosts)) {
+          posts = data.localPosts;
+        }
+        
         if (!posts || posts.length === 0) {
           listEl.innerHTML = '<div class="empty-state"><p>No posts found</p></div>';
           return;
@@ -1705,21 +3553,26 @@
           ${posts.map(post => `
             <div class="card">
               <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <strong>${post.state || 'Unknown'}</strong>
-                <span style="color: #666;">${new Date(post.createTime || post.updateTime).toLocaleDateString()}</span>
+                <strong>${post.state || post.status || 'Unknown'}</strong>
+                <span style="color: #666;">${new Date(post.createTime || post.updateTime || Date.now()).toLocaleDateString()}</span>
               </div>
-              <div style="color: #555;">${post.summary || 'No summary'}</div>
+              <div style="color: #555;">${post.summary || post.content || 'No summary'}</div>
             </div>
           `).join('')}
         `;
       } catch (error) {
-        document.getElementById('postsList').innerHTML = `<div class="alert alert-error">Error loading posts: ${error.message}</div>`;
+        const listEl = document.getElementById('postsList');
+        listEl.innerHTML = `<div class="alert alert-error">Error loading posts: ${error.message}</div>`;
+        console.error('Error loading posts:', error);
       }
     }
 
     async function researchKeywords() {
       const location = document.getElementById('trendLocation').value.trim();
       const radius = parseInt(document.getElementById('trendRadius').value) || 10;
+      const businessName = document.getElementById('rankingBusinessName')?.value?.trim() || '';
+      const websiteDomain = document.getElementById('rankingWebsiteDomain')?.value?.trim() || '';
+      const useSerpApi = !!document.getElementById('useSerpApiRankings')?.checked;
 
       if (!location) {
         showWarning('Please enter a location', 'Location Required');
@@ -1734,12 +3587,15 @@
         const response = await fetch('/api/keywords/research', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ location, radius }),
+          body: JSON.stringify({ location, radius, businessName, websiteDomain, includeRankings: useSerpApi }),
         });
 
         const data = await response.json();
 
         if (response.ok) {
+          const rankings = Array.isArray(data.rankings) ? data.rankings : [];
+          const rankingByKeyword = new Map(rankings.map(r => [r.keyword, r]));
+
           document.getElementById('trendsResults').innerHTML = `
             <div class="alert alert-success">
               ✅ Keyword research complete! Found ${data.keywordsCount || 0} keywords.
@@ -1747,13 +3603,24 @@
             <div class="card">
               <h3>Top Keywords</h3>
               <div class="keyword-list">
-                ${(data.topKeywords || []).map(kw => `
+                ${(data.topKeywords || []).map(kw => {
+                  const keyword = kw.keyword || kw;
+                  const r = rankingByKeyword.get(keyword);
+                  const gmb = r && typeof r.gmbRank === 'number' ? `#${r.gmbRank}` : '—';
+                  const web = r && typeof r.websiteRank === 'number' ? `#${r.websiteRank}` : '—';
+                  const provider = r?.provider ? String(r.provider) : 'none';
+
+                  return `
                   <div class="keyword-item">
-                    <strong>${kw.keyword || kw}</strong>
+                    <strong>${keyword}</strong>
+                    <span style="color:#666;">GBP Rank: <strong>${gmb}</strong></span>
+                    <span style="color:#666;">Website Rank: <strong>${web}</strong></span>
+                    <span style="color:#999; font-size: 0.85rem;">Source: ${provider}</span>
                     ${kw.volume ? `<span>Volume: ${kw.volume}</span>` : ''}
                     ${kw.trend ? `<span>Trend: ${kw.trend}</span>` : ''}
                   </div>
-                `).join('')}
+                `;
+                }).join('')}
               </div>
             </div>
           `;
@@ -1765,6 +3632,21 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = '🔍 Research Keywords';
+      }
+    }
+
+    async function loadRankingDefaults() {
+      try {
+        const res = await fetch('/api/keywords/research-defaults');
+        const data = await res.json();
+        if (!res.ok || !data?.success) return;
+
+        const nameEl = document.getElementById('rankingBusinessName');
+        const domainEl = document.getElementById('rankingWebsiteDomain');
+        if (nameEl && !nameEl.value) nameEl.value = data.defaultBusinessName || '';
+        if (domainEl && !domainEl.value) domainEl.value = data.defaultWebsiteDomain || '';
+      } catch (e) {
+        // non-fatal
       }
     }
 
@@ -1809,6 +3691,33 @@
           return;
         }
 
+        // Parse keywords if they're strings, otherwise use as-is (already arrays)
+        let topKeywords = data.topKeywords;
+        if (typeof topKeywords === 'string') {
+          topKeywords = JSON.parse(topKeywords);
+        }
+        
+        let trendingUp = data.trendingUp;
+        if (trendingUp && typeof trendingUp === 'string') {
+          trendingUp = JSON.parse(trendingUp);
+        }
+        
+        let trendingDown = data.trendingDown;
+        if (trendingDown && typeof trendingDown === 'string') {
+          trendingDown = JSON.parse(trendingDown);
+        }
+
+        // Ensure they're arrays
+        if (!Array.isArray(topKeywords)) {
+          topKeywords = [];
+        }
+        if (!Array.isArray(trendingUp)) {
+          trendingUp = [];
+        }
+        if (!Array.isArray(trendingDown)) {
+          trendingDown = [];
+        }
+
         resultsEl.innerHTML = `
           <div class="card">
             <h3>Latest Weekly Report</h3>
@@ -1818,7 +3727,7 @@
           <div class="card">
             <h3>Top Keywords</h3>
             <div class="keyword-list">
-              ${JSON.parse(data.topKeywords || '[]').slice(0, 20).map((kw, i) => `
+              ${topKeywords.slice(0, 20).map((kw, i) => `
                 <div class="keyword-item">
                   <strong>#${i + 1} ${typeof kw === 'string' ? kw : kw.keyword || kw}</strong>
                   ${typeof kw === 'object' && kw.volume ? `<span>Volume: ${kw.volume}</span>` : ''}
@@ -1826,11 +3735,11 @@
               `).join('')}
             </div>
           </div>
-          ${data.trendingUp ? `
+          ${trendingUp && trendingUp.length > 0 ? `
             <div class="card">
               <h3>Trending Up</h3>
               <div class="keyword-list">
-                ${JSON.parse(data.trendingUp).slice(0, 10).map((kw, i) => `
+                ${trendingUp.slice(0, 10).map((kw, i) => `
                   <div class="keyword-item">
                     <strong>${typeof kw === 'string' ? kw : kw.keyword || kw}</strong>
                   </div>
@@ -1850,7 +3759,101 @@
       }
     }
 
-    async function analyzeProfile() {
+    // OAuth Connection Functions
+    async function checkGoogleConnection() {
+      try {
+        const response = await fetch('/api/auth/google/status');
+        const status = await response.json();
+        
+        const statusEl = document.getElementById('googleConnectionStatus');
+        const connectBtn = document.getElementById('connectGoogleBtn');
+        const disconnectBtn = document.getElementById('disconnectGoogleBtn');
+        
+        if (statusEl && connectBtn && disconnectBtn) {
+          if (status.connected) {
+            statusEl.innerHTML = '<span class="badge badge-success">✓ Connected</span>';
+            connectBtn.style.display = 'none';
+            disconnectBtn.style.display = 'inline-block';
+          } else {
+            statusEl.innerHTML = '<span class="badge badge-danger">✗ Not Connected</span>';
+            connectBtn.style.display = 'inline-block';
+            disconnectBtn.style.display = 'none';
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check Google connection:', error);
+        const statusEl = document.getElementById('googleConnectionStatus');
+        if (statusEl) {
+          statusEl.innerHTML = '<span class="badge badge-danger">✗ Connection check failed</span>';
+        }
+      }
+    }
+
+    function connectGoogle() {
+      // Keep this for any legacy onClick bindings; the primary button is now an <a href="...">
+      try {
+        showInfo('Redirecting to Google sign-in...', 'Connecting');
+      } catch (_) {}
+      window.location.href = '/api/auth/google/connect';
+    }
+
+    async function disconnectGoogle() {
+      if (!confirm('Are you sure you want to disconnect Google Business Profile? This will stop automatic review fetching.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/google/disconnect', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+          showSuccess('Google Business Profile disconnected successfully', 'Disconnected');
+          checkGoogleConnection();
+        } else {
+          showError(data.error || 'Failed to disconnect', 'Disconnect Error');
+        }
+      } catch (error) {
+        showError(error.message || 'Failed to disconnect', 'Disconnect Error');
+      }
+    }
+
+    function handleOAuthCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Handle OAuth success
+      if (urlParams.get('oauth_success')) {
+        showSuccess('Google Business Profile connected successfully! You can now fetch reviews.', 'Connected');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // Refresh connection status
+        checkGoogleConnection();
+      }
+      
+      // Handle OAuth errors
+      if (urlParams.get('oauth_error')) {
+        const error = urlParams.get('oauth_error');
+        let errorMessage = 'Failed to connect Google Business Profile';
+        
+        // Provide user-friendly error messages
+        if (error === 'no_refresh_token') {
+          errorMessage = 'No refresh token received. Please try again. If this persists, check your OAuth configuration.';
+        } else if (error === 'no_code') {
+          errorMessage = 'No authorization code received. Please try connecting again.';
+        } else if (error === 'invalid_grant') {
+          errorMessage = 'Authorization failed. Your refresh token may be expired. Please try connecting again.';
+        } else if (error === 'redirect_uri_mismatch') {
+          errorMessage = 'Redirect URI mismatch. Please check your GOOGLE_REDIRECT_URI in .env matches your Google Cloud Console settings (should be: http://localhost:3000/api/auth/google/callback)';
+        } else {
+          errorMessage = `Connection failed: ${error}`;
+        }
+        
+        showError(errorMessage, 'Connection Error');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    async function analyzeProfile(event) {
       const btn = event.target;
       btn.disabled = true;
       btn.innerHTML = '<span class="loading"></span> Analyzing...';

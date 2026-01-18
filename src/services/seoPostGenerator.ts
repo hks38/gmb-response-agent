@@ -2,6 +2,8 @@ import { llmService } from './llmService';
 import { getWebsiteContext } from './websiteContext';
 import { getBusinessConfig } from './businessConfig';
 import { generatePostImage } from './imageGenerator';
+import { getBusinessSettings } from './settingsService';
+import { getDefaultBusinessId } from './tenantDefaults';
 
 export interface SEOPostInput {
   topic?: string;
@@ -9,6 +11,7 @@ export interface SEOPostInput {
   postType?: 'STANDARD' | 'EVENT' | 'OFFER' | 'ALERT';
   callToAction?: 'BOOK' | 'ORDER' | 'SHOP' | 'LEARN_MORE' | 'SIGN_UP' | 'CALL';
   ctaUrl?: string;
+  businessId?: string;
 }
 
 export interface SEOPostContent {
@@ -36,7 +39,9 @@ const LOCAL_SEO_KEYWORDS = [
  * Uses enhanced 3-layer system: Prompt Engineering → Generation → Verification
  */
 export const generateSEOPost = async (input: SEOPostInput): Promise<SEOPostContent> => {
-  const businessConfig = await getBusinessConfig();
+  const businessId = input.businessId || (await getDefaultBusinessId());
+  const businessConfig = await getBusinessConfig(businessId);
+  const settings = await getBusinessSettings(businessId);
   const practiceInfo = await getWebsiteContext();
   
   const topic = input.topic || `General dental care and practice update for ${businessConfig.name}`;
@@ -49,7 +54,7 @@ export const generateSEOPost = async (input: SEOPostInput): Promise<SEOPostConte
     task: 'seo_post',
     keywords: keywords,
     topic: topic,
-    maxWords: 150, // Strict 150 word limit
+    maxWords: settings.gmbPostMaxWords, // settings-driven word limit
     tone: 'warm, friendly, professional',
     style: 'concise and engaging',
     additionalContext: `

@@ -245,3 +245,4 @@ For issues or questions, check:
 - Database records in `keywordWeeklyReport` and `keywordTrend` tables
 - Ensure environment variables are set correctly (`.env` file)
 
+

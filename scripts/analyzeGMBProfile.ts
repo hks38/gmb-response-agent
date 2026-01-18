@@ -140,3 +140,4 @@ const getScoreRating = (score: number): string => {
 
 main();
 
+

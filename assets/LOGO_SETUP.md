@@ -41,3 +41,4 @@ Based on the provided image description, the Malama Dental logo features:
 
 If you have the actual logo file, place it in `/assets/logo.png` and the image generator will automatically use it.
 
+

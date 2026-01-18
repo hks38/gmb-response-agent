@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --card: rgba(255, 255, 255, 0.08);
+        --border: rgba(255, 255, 255, 0.14);
+        --text: #e8eefc;
+        --muted: rgba(232, 238, 252, 0.75);
+        --btn: #3b82f6;
+        --btnHover: #2563eb;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        background: radial-gradient(1200px 700px at 20% 10%, rgba(59, 130, 246, 0.25), transparent),
+          radial-gradient(900px 600px at 80% 40%, rgba(34, 197, 94, 0.18), transparent),
+          var(--bg);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 520px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      }
+      h1 {
+        margin: 0 0 10px 0;
+        font-size: 1.6rem;
+        letter-spacing: 0.2px;
+      }
+      p {
+        margin: 0 0 18px 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: var(--btn);
+        color: white;
+        border: none;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 120ms ease, background 120ms ease;
+      }
+      .btn:hover { background: var(--btnHover); transform: translateY(-1px); }
+      .hint {
+        margin-top: 14px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .error {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(239, 68, 68, 0.14);
+        border: 1px solid rgba(239, 68, 68, 0.35);
+        color: #ffd6d6;
+        font-size: 0.95rem;
+        display: none;
+      }
+      .footer {
+        margin-top: 18px;
+        font-size: 0.85rem;
+        color: rgba(232, 238, 252, 0.55);
+      }
+      code { color: rgba(232, 238, 252, 0.85); }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Sign in to your dashboard</h1>
+      <p>Use Google to sign in. After authentication, you’ll be redirected to the portal.</p>
+
+      <a class="btn" href="/api/auth/login/google">
+        <span style="font-size: 1.1rem;">G</span>
+        Continue with Google
+      </a>
+
+      <div style="height: 14px;"></div>
+
+      <div style="border-top: 1px solid rgba(255,255,255,0.16); padding-top: 14px;">
+        <p style="margin-bottom: 10px;">Or get a one-time sign-in link by email.</p>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input id="magicEmail" type="email" placeholder="you@company.com"
+            style="flex: 1; padding: 12px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); color: var(--text);" />
+          <button id="magicBtn" class="btn" style="width: auto; white-space: nowrap;">Send link</button>
+        </div>
+        <div class="hint" id="magicHint" style="margin-top: 10px;"></div>
+      </div>
+
+      <div class="error" id="errorBox"></div>
+      <div class="hint">If you see <code>redirect_uri_mismatch</code>, update your Google OAuth redirect URI.</div>
+      <div class="footer">Powered by your platform OAuth configuration.</div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const err = params.get('error');
+      if (err) {
+        const box = document.getElementById('errorBox');
+        box.style.display = 'block';
+        box.textContent = decodeURIComponent(err);
+      }
+
+      const magicBtn = document.getElementById('magicBtn');
+      magicBtn?.addEventListener('click', async () => {
+        const email = document.getElementById('magicEmail')?.value?.trim();
+        const hint = document.getElementById('magicHint');
+        if (hint) hint.textContent = '';
+        if (!email) {
+          if (hint) hint.textContent = 'Enter an email address.';
+          return;
+        }
+        try {
+          magicBtn.disabled = true;
+          if (hint) hint.textContent = 'Sending...';
+          const res = await fetch('/api/auth/login/magic-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.error || data?.message || 'Failed to send link');
+          if (hint) hint.textContent = 'Check your email for a sign-in link (valid for 15 minutes).';
+        } catch (e) {
+          if (hint) hint.textContent = e.message || 'Failed to send link';
+        } finally {
+          magicBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
+
+
+

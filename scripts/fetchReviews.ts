@@ -4,6 +4,7 @@ import { fetchGoogleReviews } from '../src/services/googleReviews';
 import { analyzeReview } from '../src/services/analysisService';
 import { ReviewAnalysis } from '../src/types';
 import { discoverFirstLocation } from '../src/services/discoverLocation';
+import { getDefaultBusinessId, getDefaultLocationId } from '../src/services/tenantDefaults';
 
 dotenv.config();
 
@@ -34,6 +35,9 @@ const needsApproval = (analysis: ReviewAnalysis, rating: number): boolean => {
 };
 
 const main = async () => {
+  const businessId = await getDefaultBusinessId();
+  const locationIdInternal = await getDefaultLocationId();
+
   // Auto-discover location ID if not provided, or get account ID if location ID is partial
   let accountId: string | undefined;
   if (!GOOGLE_LOCATION_ID) {
@@ -92,7 +96,7 @@ const main = async () => {
     try {
       const rating = normalizeRating((review as any).starRating ?? (review as any).rating);
       const existing = await prisma.review.findUnique({
-        where: { reviewId: review.reviewId },
+        where: { locationId_reviewId: { locationId: locationIdInternal, reviewId: review.reviewId } },
       });
 
       const isUpdated =
@@ -142,7 +146,7 @@ const main = async () => {
         if (needsReplySync) {
           console.log(`  → Syncing reply status for review ${review.reviewId} (already has reply on Google)`);
           await prisma.review.update({
-            where: { reviewId: review.reviewId },
+            where: { locationId_reviewId: { locationId: locationIdInternal, reviewId: review.reviewId } },
             data: {
               status: 'Replied',
               repliedAt: replyTime,
@@ -209,8 +213,10 @@ const main = async () => {
 
       // Save review with or without analysis
       await prisma.review.upsert({
-        where: { reviewId: review.reviewId },
+        where: { locationId_reviewId: { locationId: locationIdInternal, reviewId: review.reviewId } },
         create: {
+          businessId,
+          locationId: locationIdInternal,
           reviewId: review.reviewId,
           authorName: review.reviewer?.displayName || 'Guest',
           rating,

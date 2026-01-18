@@ -7,6 +7,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "fetch-reviews": "ts-node scripts/fetchReviews.ts",
     "fetch-all-reviews": "ts-node scripts/fetchReviews.ts --all",
     "refresh-website": "ts-node scripts/refreshWebsiteContext.ts",
@@ -42,8 +44,11 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.4.0",
+    "google-ads-api": "^22.0.0",
     "google-auth-library": "^9.15.1",
     "morgan": "^1.10.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.12",
     "openai": "^4.72.0",
     "sharp": "^0.33.5",
     "zod": "^3.23.8"
@@ -56,6 +61,7 @@
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9"
   }
 }
