@@ -1,243 +1,190 @@
-# Google Business Profile Review Response Agent
+# BusinessAI Suite
 
-An AI-powered agent that automatically fetches Google Business Profile reviews, analyzes them with OpenAI/Llama 3, and provides a lightweight approval UI for dental practices.
+A comprehensive, AI-powered platform for managing Google Business Profile reviews, generating SEO-optimized posts, conducting keyword research, competitive analysis, and automating business intelligence workflows for multi-tenant businesses.
 
-## Features
+## 🚀 Overview
 
-- Fetch latest Google Business Profile reviews (single location) and deduplicate by `reviewId`.
-- AI analysis per review: sentiment, urgency, topics, suggested actions, risk flags, reply draft.
-- **Multi-LLM support**: Uses OpenAI by default, automatically falls back to Ollama/Llama 3 when quota is exceeded (see `OLLAMA_SETUP.md`).
-- **Website context integration**: Automatically fetches and uses practice information from your website (e.g., services, location, USPs) to generate more authentic, relevant replies.
-- Approval logic: `Needs Approval` when HIPAA risk, negative sentiment, or rating <= 3; otherwise `Auto-Approved`.
-- Minimal admin UI (served by Express) to filter, view, edit, and copy replies.
-- SQLite via Prisma; includes schema and initial migration.
+BusinessAI Suite is a full-featured SaaS platform that helps businesses manage their online presence, respond to reviews intelligently, track competitors, analyze keywords, and automate marketing tasks. Built with multi-tenant architecture and role-based access control (RBAC), it supports multiple businesses and teams.
 
-## Setup
+## ✨ Key Features
+
+### 📝 Review Management
+- **Automated Review Fetching**: Automatically syncs reviews from Google Business Profile
+- **AI-Powered Analysis**: Analyzes sentiment, urgency, topics, and generates contextual reply drafts
+- **HIPAA Compliance Checks**: Automatic compliance guardrails for healthcare practices
+- **Bulk Actions**: Approve and post multiple replies with rate limiting protection
+- **Quality Controls**: Language detection, variant generation, and signature customization
+
+### 📊 Competitive Intelligence
+- **Smart Competitor Discovery**: AI-verified competitor discovery with multi-stage filtering
+- **Map Visualization**: Interactive map showing all competitor locations with search radius
+- **Comprehensive Website Analysis**: AI-powered SEO, content, UX analysis with specialty services and insurance carrier detection
+- **Full Website Scraping**: Scrapes entire competitor websites via sitemap or link crawling
+- **Specialty Services Detection**: Identifies advanced procedures (veneers, implants, all-on-4, all-on-x, etc.)
+- **Insurance Carrier Analysis**: Detects accepted insurance companies from competitor websites
+- **Keyword Overlap**: Identify shared keywords and ranking opportunities
+- **Velocity Tracking**: Monitor competitor review and rating trends over time
+- **Community Mapping**: Dynamic maps with employers, hospitals, schools, and demographic data
+- **Market Opportunities**: Identify competitor clusters and coverage gaps
+
+### 📈 SEO & Keyword Research
+- **Trending Keywords**: Discover trending keywords based on Google Trends and SerpAPI
+- **Ranking Tracking**: Track GBP (Maps) and website (organic) rankings
+- **Weekly Reports**: Automated weekly keyword trend reports
+- **Competitor Comparison**: Compare rankings against competitors
+- **Geographic Keyword Analysis**: Identify optimal marketing areas based on keyword costs and competition
+
+### 📱 Google Business Profile Posts
+- **AI-Generated Content**: SEO-optimized posts with local keyword integration
+- **Smart Post Generation**: Uses keyword trends for relevant content
+- **Multiple Post Types**: STANDARD, EVENT, OFFER, and ALERT posts
+- **CTA Buttons**: Book, Order, Shop, Learn More, Sign Up, Call
+- **Image Generation**: AI-generated post images (optional)
+- **Duplicate Prevention**: Automatically avoids repeating topics from recent posts
+
+### 🤖 Automation & Scheduling
+- **Daily Review Sync**: Automatically fetch and analyze new reviews
+- **Automated Email Notifications**: Email alerts for review approvals
+- **Weekly Post Generation**: Automated SEO-optimized post creation
+- **Monthly Executive Reports**: Comprehensive business intelligence reports
+
+### 👥 Multi-Tenant & Team Management
+- **Multiple Businesses**: Manage multiple businesses in one account
+- **Team Collaboration**: Invite team members with role-based access
+- **RBAC**: Owner, Admin, and Staff roles with granular permissions
+- **Business Switcher**: Easy switching between businesses
+- **Per-Business Settings**: Customizable settings per business (scheduler, email, review response preferences)
+
+### 🔐 Security & Compliance
+- **Token Encryption**: AES-256-GCM encryption for sensitive credentials
+- **Audit Logging**: Complete audit trail of all actions
+- **Compliance Guardrails**: Automated checks for HIPAA and sensitive content
+- **Session Management**: Secure cookie-based authentication
+- **Automatic Token Refresh**: Seamless Google OAuth token management without manual reconnection
+
+## 📚 Documentation
+
+- **[DEVELOPERS_GUIDE.md](DEVELOPERS_GUIDE.md)** - Complete developer setup and architecture guide
+- **[USER_GUIDE.md](USER_GUIDE.md)** - End-user documentation for all features
+- **[TROUBLESHOOTING_GUIDE.md](TROUBLESHOOTING_GUIDE.md)** - Common issues and solutions
+
+## 🏗️ Technology Stack
+
+- **Backend**: Node.js, Express.js, TypeScript
+- **Database**: SQLite (via Prisma ORM)
+- **AI/ML**: OpenAI GPT-4, Ollama (Llama 3 fallback)
+- **Authentication**: Google OIDC, Magic Link
+- **APIs**: Google Business Profile API, Google Places API, SerpAPI, Google Ads API
+- **Scheduling**: node-cron
+- **Email**: Nodemailer
+- **Testing**: Vitest
+- **Maps**: Google Maps JavaScript API with Visualization library
+- **Web Scraping**: Cheerio for HTML parsing
+
+## 🚦 Quick Start
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Google Cloud Console project with APIs enabled
+- OpenAI API key (or Ollama for local LLM)
+
+### Installation
 
 ```bash
+# Clone the repository
 cd gmbResponseAgent
+
+# Install dependencies
 npm install
-cp env.example .env   # fill with your secrets
+
+# Copy environment template
+cp env.example .env
+
+# Edit .env with your credentials (see env.example for details)
+# Required: OPENAI_API_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, etc.
+
+# Generate Prisma client
 npx prisma generate
+
+# Run migrations
 npx prisma migrate deploy
+
+# Start development server
+npm run dev
 ```
 
-Environment variables (see `env.example`):
-- `DATABASE_URL` (default `file:./prisma/dev.db`)
-- **LLM Configuration**:
-  - `OPENAI_API_KEY`, `OPENAI_MODEL` (primary - defaults to `gpt-4o-mini`)
-  - `OLLAMA_API_URL`, `OLLAMA_MODEL` (optional fallback - for Llama 3, see `OLLAMA_SETUP.md`)
-- **Google Auth** (choose one):
-  - Option A (Testing): `GOOGLE_ACCESS_TOKEN` (expires in ~1 hour, get from OAuth Playground)
-  - Option B (Production): `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` (auto-refreshes, run `npm run get-refresh-token`)
-- `GOOGLE_LOCATION_ID` (optional - will auto-discover if not set)
-- `GOOGLE_ACCOUNT_ID` (optional - not required, only used during auto-discovery)
-- `WEBSITE_URL` (default `https://malama.dental` - used for context in replies)
-- `PORT`, `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX`
+Visit `http://localhost:3000` to access the application.
 
-## Running
+## 📖 Getting Started
 
-- API + UI: `npm run dev` (ts-node-dev) or `npm run build && npm start`
-- Manual ingest + analyze: `npm run fetch-reviews`
-- Refresh website context cache: `npm run refresh-website` (cached for 24 hours, auto-fetched on first use)
-- Suggested cron (every 30m):
-  ```
-  */30 * * * * cd /path/to/gmbResponseAgent && /usr/local/bin/node ./node_modules/.bin/ts-node scripts/fetchReviews.ts >> logs/gbp-job.log 2>&1
-  ```
+1. **Read the [DEVELOPERS_GUIDE.md](DEVELOPERS_GUIDE.md)** for detailed setup instructions
+2. **Configure Google OAuth** (see [GOOGLE_BUSINESS_PROFILE_SETUP.md](GOOGLE_BUSINESS_PROFILE_SETUP.md))
+3. **Connect your Google Business Profile** via the Settings page
+4. **Start using features** - see [USER_GUIDE.md](USER_GUIDE.md) for detailed workflows
 
-## Website Context Integration
+## 🛠️ Common Tasks
 
-The agent automatically fetches practice information from your website to make replies more authentic and relevant. It extracts:
-- Practice name, location, contact info
-- Services offered
-- Unique selling points and practice values
-- Practice description
-
-This context is:
-- **Cached for 24 hours** to avoid excessive scraping
-- **Automatically included** in every review analysis prompt
-- **Used naturally** in reply drafts (e.g., referencing specific services mentioned on your site)
-
-To manually refresh the cache: `npm run refresh-website`
-
-## LLM Fallback Support (Llama 3/Ollama)
-
-**📖 See [OLLAMA_SETUP.md](OLLAMA_SETUP.md) for detailed setup instructions.**
-
-The agent automatically falls back to Ollama/Llama 3 when OpenAI quota is exceeded. This allows you to continue processing reviews even when hitting API limits.
-
-**Quick Setup:**
-1. Install Ollama: `brew install ollama` (or download from ollama.ai)
-2. Start server: `ollama serve`
-3. Pull model: `ollama pull llama3`
-4. Add to `.env`: `OLLAMA_API_URL="http://localhost:11434"` and `OLLAMA_MODEL="llama3"`
-
-The system will automatically use Ollama when OpenAI fails - no code changes needed!
-
-## Google OAuth Setup
-
-**📖 See [GOOGLE_BUSINESS_PROFILE_SETUP.md](GOOGLE_BUSINESS_PROFILE_SETUP.md) for detailed step-by-step instructions.**
-
-**Quick Setup:**
-
-**Option A (Testing):** Get a short-lived access token from [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/) → Set `GOOGLE_ACCESS_TOKEN` in `.env`
-
-**Option B (Production - Recommended):** 
-1. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` in `.env` (from Google Cloud Console)
-2. Run `npm run get-refresh-token` to get a refresh token
-3. Add `GOOGLE_REFRESH_TOKEN` to `.env`
-4. Tokens automatically refresh - no manual updates needed!
-
-**Location ID:** Format `locations/1234567890` - get from Google Business Profile API (see setup guide).
-
-**Base API:** `https://mybusiness.googleapis.com/v4/{locationId}/reviews` with scope `https://www.googleapis.com/auth/business.manage`
-
-## Admin UI
-
-- Served from `public/index.html` by Express (`/api/reviews` backend).
-- Filters by status/sentiment/rating, shows AI analysis, and lets you edit + save the reply draft or copy it to clipboard.
-- Reply style rules live in `src/prompts/reviewPrompt.ts`; OpenAI call in `src/services/analysisService.ts`.
-
-## SEO-Targeted Posts on Google Business Profile
-
-Create and publish SEO-optimized posts directly to your Google Business Profile to boost local visibility. The system now **automatically uses weekly keyword reports** to generate posts based on trending keywords in your area!
-
-### Features
-
-- **AI-Generated Content**: Uses LLM (OpenAI/Ollama) to create engaging, SEO-optimized post content
-- **Local SEO Integration**: Naturally includes local keywords (e.g., "Long Valley dentist", "family dentist")
-- **Website Context**: Uses practice information from your website for authentic, relevant posts
-- **Multiple Post Types**: Support for STANDARD, EVENT, OFFER, and ALERT posts
-- **Call-to-Action Buttons**: Includes CTAs like "Book Appointment", "Learn More", etc.
-
-### Usage
-
-**Smart Post Generation (Recommended):**
-Automatically uses weekly keyword report data when available, falls back to custom topic if no report exists.
-
+### Development
 ```bash
-# Uses weekly report keywords (if available), otherwise uses default topic
-npm run generate-smart-post
-
-# Use custom topic as fallback (only if no report exists)
-npm run generate-smart-post "Teeth whitening special"
-
-# Generate multiple posts from weekly report
-npm run generate-smart-post "" STANDARD LEARN_MORE true 3
-
-# Force custom topic (ignore weekly report)
-npm run generate-smart-post "New patient special" STANDARD BOOK false
+npm run dev              # Start dev server with hot reload
+npm run build            # Build for production
+npm start                # Run production build
+npm test                 # Run test suite
+npm run test:watch       # Run tests in watch mode
 ```
 
-**Legacy Single Post (still available):**
+### Review Management
 ```bash
-# Create post with specific topic (ignores weekly report)
-npm run create-seo-post "Dental cleaning tips for healthy teeth"
-npm run create-seo-post "New patient special" OFFER SHOP
+npm run fetch-reviews    # Fetch and analyze reviews manually
+npm run list-reviews     # List all reviews
+npm run list-unreplied   # List unreplied reviews
 ```
 
-**List existing posts:**
+### Posts & Content
 ```bash
-npm run list-posts
+npm run generate-smart-post    # Generate SEO post from keywords
+npm run create-seo-post        # Create post with custom topic
+npm run list-posts             # List all posts
 ```
 
-### How Smart Post Generation Works
-
-1. **Checks for Weekly Report**: Looks for the latest weekly keyword report in the database
-2. **Uses Trending Keywords**: If report exists, selects top trending keywords to generate posts
-3. **Fallback to Topic**: If no report exists, uses provided topic or default "General dental care"
-4. **Multiple Posts**: Can generate multiple posts (one per keyword) from the weekly report
-
-**Workflow:**
+### Keyword Research
 ```bash
-# Step 1: Generate weekly keyword report (Monday)
-npm run weekly-keyword-report
-
-# Step 2: Generate posts based on trending keywords (throughout the week)
-npm run generate-smart-post  # Automatically uses report keywords
+npm run research-keywords      # Research keywords
+npm run weekly-keyword-report  # Generate weekly report
+npm run view-keyword-trends    # View trending keywords
 ```
 
-### Post Types
+## 🔧 Configuration
 
-- **STANDARD**: Regular informational posts
-- **EVENT**: Posts about upcoming events
-- **OFFER**: Promotional posts with special offers
-- **ALERT**: Important announcements
+All configuration is done via environment variables in `.env`. Key settings:
 
-### Call-to-Action Options
+- **LLM**: `OPENAI_API_KEY`, `OPENAI_MODEL` (or `OLLAMA_API_URL` for local)
+- **Google OAuth**: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`
+- **Database**: `DATABASE_URL` (default: SQLite)
+- **Email**: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
+- **Scheduler**: `SCHEDULER_TZ`, cron expressions for automated tasks
 
-- `BOOK` - Book an appointment
-- `ORDER` - Place an order
-- `SHOP` - Shop now
-- `LEARN_MORE` - Learn more
-- `SIGN_UP` - Sign up
-- `CALL` - Call us
+See `env.example` for all available configuration options.
 
-### Example
+## 🏛️ Architecture
 
-```bash
-# Create a standard post about dental services
-npm run create-seo-post "Comprehensive dental care services"
+- **Multi-Tenant**: Data isolation by `businessId` and `locationId`
+- **RBAC**: Role-based access control (Owner/Admin/Staff)
+- **Service Layer**: Modular services for reviews, posts, keywords, competitive insights
+- **Scheduled Jobs**: Automated tasks via node-cron
+- **API-First**: RESTful APIs with Express.js
 
-# Create an offer post
-npm run create-seo-post "New patient special - 20% off cleaning" OFFER SHOP
+See [DEVELOPERS_GUIDE.md](DEVELOPERS_GUIDE.md) for detailed architecture documentation.
 
-# Create an event post
-npm run create-seo-post "Open house event this Saturday" EVENT LEARN_MORE
-```
+## 📝 License
 
-The system automatically:
-- Generates SEO-optimized content with natural keyword inclusion
-- Uses practice information from your website
-- Includes appropriate call-to-action buttons
-- Posts directly to your Google Business Profile
+Private / Proprietary
 
-## Documentation
+## 🤝 Support
 
-- **[GOOGLE_BUSINESS_PROFILE_SETUP.md](GOOGLE_BUSINESS_PROFILE_SETUP.md)** - Complete Google OAuth setup guide
-- **[OLLAMA_SETUP.md](OLLAMA_SETUP.md)** - Llama 3/Ollama fallback setup
-- **[HOW_TO_FIND_LOCATION_ID.md](HOW_TO_FIND_LOCATION_ID.md)** - Finding your Google Business Profile Location ID
-- **[WHICH_APIS_TO_ENABLE.md](WHICH_APIS_TO_ENABLE.md)** - Which Google APIs to enable
-- **[TROUBLESHOOTING_OAUTH.md](TROUBLESHOOTING_OAUTH.md)** - OAuth troubleshooting guide
-- **[TROUBLESHOOTING_REVIEWS_API.md](TROUBLESHOOTING_REVIEWS_API.md)** - Reviews API troubleshooting guide
+For issues and troubleshooting, see [TROUBLESHOOTING_GUIDE.md](TROUBLESHOOTING_GUIDE.md).
 
-## Project Structure
+---
 
-```
-gmbResponseAgent/
-├── src/
-│   ├── server.ts              # Express server
-│   ├── routes/
-│   │   └── reviews.ts         # API routes
-│   ├── services/
-│   │   ├── analysisService.ts # OpenAI/Llama analysis
-│   │   ├── llmService.ts      # Unified LLM service with fallback
-│   │   ├── googleReviews.ts   # Google API client
-│   │   ├── googleAuth.ts      # OAuth token management
-│   │   ├── websiteContext.ts  # Website context caching
-│   │   └── websiteScraper.ts  # Website scraping
-│   ├── prompts/
-│   │   └── reviewPrompt.ts    # LLM prompt template
-│   ├── db/
-│   │   └── client.ts          # Prisma client
-│   └── types.ts               # TypeScript types
-├── scripts/
-│   ├── fetchReviews.ts        # Main fetch + analyze script
-│   ├── getRefreshToken.ts     # OAuth token setup
-│   ├── getLocationId.ts       # Location ID discovery
-│   ├── refreshWebsiteContext.ts # Manual context refresh
-│   └── updateReply.ts         # Manual reply update script
-├── prisma/
-│   ├── schema.prisma          # Database schema
-│   └── migrations/            # Database migrations
-├── public/
-│   └── index.html             # Admin UI
-├── data/
-│   ├── google-tokens.json     # OAuth tokens (auto-generated)
-│   └── website-context.json   # Website context cache
-├── package.json
-├── tsconfig.json
-├── env.example
-└── README.md                  # This file
-```
-
+**Built with ❤️ for businesses that want to automate and scale their online presence management.**

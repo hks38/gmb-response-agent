@@ -16,6 +16,131 @@
       background: #f5f7fa;
       color: #333;
       line-height: 1.6;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 260px;
+      background: #1a1d29;
+      color: #e0e0e0;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: #151720;
+    }
+
+    .sidebar-header h2 {
+      color: white;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .sidebar-nav {
+      padding: 10px 0;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-item > .nav-link {
+        display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      color: #e0e0e0;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item > .nav-link:hover {
+      background: rgba(255,255,255,0.05);
+      color: white;
+    }
+
+    .nav-item > .nav-link.active {
+      background: rgba(102, 126, 234, 0.15);
+      color: #667eea;
+      border-left-color: #667eea;
+      font-weight: 600;
+    }
+
+    .nav-item > .nav-link .nav-icon {
+      margin-right: 12px;
+      font-size: 1.1rem;
+    }
+
+    .nav-item > .nav-link .nav-arrow {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-item.expanded > .nav-link .nav-arrow {
+      transform: rotate(90deg);
+    }
+
+    .nav-submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .nav-item.expanded > .nav-submenu {
+      max-height: 1000px;
+    }
+
+    .nav-submenu .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px 10px 50px;
+      color: #b0b0b0;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      font-size: 0.9rem;
+    }
+
+    .nav-submenu .nav-link:hover {
+      background: rgba(255,255,255,0.05);
+      color: white;
+    }
+
+    .nav-submenu .nav-link.active {
+      background: rgba(102, 126, 234, 0.15);
+      color: #667eea;
+      border-left-color: #667eea;
+      font-weight: 600;
+    }
+
+    .nav-submenu .nav-link .nav-icon {
+      margin-right: 10px;
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      min-height: 100vh;
+      background: #f5f7fa;
     }
 
     .container {
@@ -30,6 +155,7 @@
       padding: 30px 0;
       margin-bottom: 30px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        width: 100%;
     }
 
     .header-inner {
@@ -164,35 +290,7 @@
       opacity: 0.9;
     }
 
-    .tabs {
-        display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-        flex-wrap: wrap;
-      border-bottom: 2px solid #e0e0e0;
-      padding-bottom: 10px;
-    }
-
-    .tab {
-      padding: 12px 24px;
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px 8px 0 0;
-        cursor: pointer;
-      font-weight: 500;
-      transition: all 0.3s;
-      border-bottom: none;
-    }
-
-    .tab:hover {
-      background: #f8f9fa;
-    }
-
-    .tab.active {
-      background: #667eea;
-      color: white;
-      border-color: #667eea;
-    }
+    /* Tabs removed - using sidebar navigation instead */
 
     .tab-content {
       display: none;
@@ -814,10 +912,75 @@
   <body>
   <!-- Notification Container -->
   <div class="notification-container" id="notificationContainer"></div>
+  
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>BusinessAI Suite</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item expanded" id="gmbNavItem">
+        <div class="nav-link" onclick="toggleNavItem('gmbNavItem')">
+          <span>
+            <span class="nav-icon">🏢</span>
+            Google My Business
+          </span>
+          <span class="nav-arrow">▶</span>
+        </div>
+        <div class="nav-submenu">
+          <a class="nav-link active" onclick="showTab('reviews', event)" data-tab="reviews">
+            <span class="nav-icon">📝</span>
+            Reviews
+          </a>
+          <a class="nav-link" onclick="showTab('posts', event)" data-tab="posts">
+            <span class="nav-icon">📄</span>
+            GMB Posts
+          </a>
+          <a class="nav-link" onclick="showTab('trends', event)" data-tab="trends">
+            <span class="nav-icon">📊</span>
+            Keyword Trends
+          </a>
+          <a class="nav-link" onclick="showTab('analyzer', event)" data-tab="analyzer">
+            <span class="nav-icon">🔍</span>
+            Profile Analyzer
+          </a>
+        </div>
+      </div>
+      <!-- Competitive Insights as separate top-level menu -->
+      <div class="nav-item">
+        <a class="nav-link" onclick="showTab('competitive', event)" data-tab="competitive">
+          <span>
+            <span class="nav-icon">🏁</span>
+            Competitive Insights
+          </span>
+        </a>
+      </div>
+      <!-- Campaigns as separate top-level menu -->
+      <div class="nav-item expanded" id="campaignsNavItem">
+        <div class="nav-link" onclick="toggleNavItem('campaignsNavItem')">
+          <span>
+            <span class="nav-icon">📈</span>
+            Campaigns
+          </span>
+          <span class="nav-arrow">▶</span>
+        </div>
+        <div class="nav-submenu">
+          <a class="nav-link" onclick="showTab('campaigns', event)" data-tab="campaigns">
+            <span class="nav-icon">🗺️</span>
+            Geographic Keyword Analysis
+          </a>
+        </div>
+      </div>
+      <!-- Future tools can be added here -->
+    </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
     <header>
       <div class="container header-inner">
         <div class="header-left">
-          <h1>🦷 GMB Review Response Agent</h1>
+          <h1>🦷 BusinessAI Suite</h1>
           <p><span id="headerBusinessName">Malama Dental</span> - Admin Dashboard</p>
         </div>
 
@@ -841,6 +1004,7 @@
                 <div style="font-weight:800;" id="pdName">Signed in</div>
                 <div class="pd-email" id="pdEmail"></div>
               </div>
+              <button id="teamProfileBtn" style="display:none" onclick="showTab('team', event)">👥 Team</button>
               <button onclick="openSettings()">⚙️ Settings</button>
               <button class="danger" onclick="doLogout()">🚪 Logout</button>
             </div>
@@ -850,8 +1014,8 @@
     </header>
 
   <div class="container">
-    <!-- Stats Overview -->
-    <div class="stats-grid" id="statsGrid">
+    <!-- Stats Overview - Only shown on Reviews page -->
+    <div class="stats-grid" id="statsGrid" style="display: none;">
       <div class="stat-card">
         <h3 id="totalReviews">-</h3>
         <p>Total Reviews</p>
@@ -870,16 +1034,7 @@
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <div class="tab active" onclick="showTab('reviews', event)">📝 Reviews</div>
-      <div class="tab" onclick="showTab('reply', event)">💬 Reply to Review</div>
-      <div class="tab" onclick="showTab('posts', event)">📄 GMB Posts</div>
-      <div class="tab" onclick="showTab('trends', event)">📊 Keyword Trends</div>
-      <div class="tab" onclick="showTab('competitive', event)">🏁 Competitive</div>
-      <div class="tab" onclick="showTab('analyzer', event)">🔍 Profile Analyzer</div>
-      <div class="tab" id="teamTab" style="display:none" onclick="showTab('team', event)">👥 Team</div>
-    </div>
+    <!-- Tabs removed - now using sidebar navigation -->
 
     <!-- Reviews Tab -->
     <div id="reviews" class="tab-content active">
@@ -961,41 +1116,6 @@
       </div>
 
       <div id="reviewsList"></div>
-    </div>
-
-    <!-- Reply Tab -->
-    <div id="reply" class="tab-content">
-      <h2 class="section-title">Reply to Specific Review</h2>
-      
-      <div class="card">
-        <div class="form-group">
-          <label>Search by Author Name</label>
-          <input type="text" id="searchAuthor" placeholder="Enter author name..." onkeyup="searchReview()">
-        </div>
-        <div id="searchResults"></div>
-      </div>
-
-      <div id="replyForm" style="display: none;">
-        <div class="card">
-          <h3>Review Details</h3>
-          <div id="reviewDetails"></div>
-        </div>
-
-        <div class="card">
-          <h3>AI Analysis</h3>
-          <div id="reviewAnalysis"></div>
-        </div>
-
-        <div class="card">
-          <h3>Reply Draft</h3>
-          <div class="form-group">
-            <textarea id="replyDraft" placeholder="Reply draft will appear here..."></textarea>
-          </div>
-          <button class="btn" onclick="generateReply()">🤖 Generate AI Reply</button>
-          <button class="btn btn-success" onclick="postReply()">📤 Post Reply</button>
-          <button class="btn btn-secondary" onclick="saveReply()">💾 Save Draft</button>
-        </div>
-      </div>
     </div>
 
     <!-- Posts Tab -->
@@ -1098,7 +1218,7 @@
         <div class="filter-row">
           <div class="form-group">
             <label>Query</label>
-            <input type="text" id="compQuery" placeholder="e.g., dentist near me" value="dentist" />
+            <input type="text" id="compQuery" placeholder="e.g., general dentist near me" value="general dentist" />
           </div>
           <div class="form-group">
             <label>Radius (miles)</label>
@@ -1111,6 +1231,7 @@
           <div class="form-group">
             <button class="btn" onclick="discoverCompetitorsUi(event)">🔎 Discover</button>
             <button class="btn btn-secondary" onclick="refreshCompetitorsUi(event)">♻️ Refresh snapshots</button>
+            <button class="btn btn-secondary" onclick="refreshCompetitorCoordinates(event)">📍 Refresh coordinates</button>
           </div>
         </div>
         <div class="small-muted" style="margin-top:8px;">
@@ -1118,9 +1239,78 @@
         </div>
       </div>
 
-      <div class="card">
-        <h3 style="margin-top:0;">Competitors</h3>
-        <div id="competitiveList"></div>
+      <div class="card" id="competitiveSplitView" style="display: flex; gap: 20px; padding: 0;">
+        <div style="flex: 1; padding: 20px; border-right: 1px solid #e5e7eb;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin-top:0; margin-bottom: 0;">Map View</h3>
+            <button class="btn btn-secondary btn-sm" onclick="discoverCommunityPoints()" style="font-size: 0.85em;">
+              🔍 Discover Community
+            </button>
+          </div>
+          
+          <!-- Layer Control Panel -->
+          <div id="mapLayerControls" style="background: #f9fafb; padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #e5e7eb;">
+            <div style="font-weight: 600; font-size: 0.9em; margin-bottom: 8px; color: #374151;">Map Layers</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 0.85em;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="layerCompetitors" checked onchange="toggleMapLayer('competitors', this.checked)" />
+                <span>Competitors</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="layerEmployers" checked onchange="toggleMapLayer('employers', this.checked)" />
+                <span>Employers</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="layerHospitals" checked onchange="toggleMapLayer('hospitals', this.checked)" />
+                <span>Hospitals</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="layerSchools" checked onchange="toggleMapLayer('schools', this.checked)" />
+                <span>Schools</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="layerDemographicsIncome" onchange="toggleMapLayer('demographicsIncome', this.checked)" />
+                <span>Income Heatmap</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="layerDemographicsPopulation" onchange="toggleMapLayer('demographicsPopulation', this.checked)" />
+                <span>Population Heatmap</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Data Summary Panel -->
+          <div id="dataSummaryPanel" style="background: #ffffff; padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #e5e7eb; display: none;">
+            <div style="font-weight: 600; font-size: 0.9em; margin-bottom: 8px; color: #374151;">Area Statistics</div>
+            <div id="dataSummaryContent" style="font-size: 0.85em; color: #666;">
+              <div>Click on the map or select an area to view statistics</div>
+            </div>
+          </div>
+          
+          <!-- Market Opportunity Panel -->
+          <div id="marketOpportunityPanel" style="background: #ffffff; padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #e5e7eb; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="font-weight: 600; font-size: 0.9em; color: #374151;">Market Opportunities</div>
+              <button class="btn btn-secondary btn-sm" onclick="loadMarketOpportunities()" style="font-size: 0.8em;">Refresh</button>
+            </div>
+            <div id="marketOpportunityContent" style="font-size: 0.85em; color: #666; max-height: 200px; overflow-y: auto;">
+              <div>Loading opportunities...</div>
+            </div>
+          </div>
+          
+          <div id="competitiveMap" style="width:100%; height:600px; border-radius:8px; overflow:hidden; background:#f0f0f0; display:flex; align-items:center; justify-content:center; color:#666;">
+            <div>Map will appear here after discovering competitors</div>
+          </div>
+        </div>
+        <div style="flex: 1; padding: 20px; max-height: 640px; overflow-y: auto;">
+          <h3 style="margin-top:0; margin-bottom: 15px;">Competitors <span id="competitorCount" style="font-size:0.9em; color:#666; font-weight:normal;"></span></h3>
+          <div id="competitiveList"></div>
+          <div id="competitivePagination" style="margin-top: 15px; display: none; justify-content: center; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #e5e7eb;">
+            <button class="btn btn-secondary btn-sm" id="prevPage" onclick="changeCompetitorPage(-1)">← Previous</button>
+            <span id="pageInfo" style="color:#666;"></span>
+            <button class="btn btn-secondary btn-sm" id="nextPage" onclick="changeCompetitorPage(1)">Next →</button>
+          </div>
+        </div>
       </div>
 
       <div class="card" id="competitiveInsightsCard" style="display:none;">
@@ -1171,6 +1361,78 @@
       <div class="card">
         <h3 style="margin-top:0;">Members</h3>
         <div id="teamMembers"></div>
+      </div>
+    </div>
+
+    <!-- Campaigns Tab -->
+    <div id="campaigns" class="tab-content">
+      <h2 class="section-title">Geographic Keyword Analysis</h2>
+      
+      <div class="card">
+        <h3>Practice Location Setup</h3>
+        <div class="form-group">
+          <label>Practice Name</label>
+          <input type="text" id="campaignPracticeName" placeholder="Enter practice name">
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="campaignPracticeAddress" placeholder="Enter full address">
+        </div>
+        <div class="form-group">
+          <label>Radius (miles)</label>
+          <input type="number" id="campaignRadius" value="20" min="5" max="50">
+        </div>
+        <button class="btn" onclick="saveCampaignPractice()">💾 Save Practice Location</button>
+        <button class="btn btn-secondary" onclick="loadCampaignPractice()">🔄 Load Existing</button>
+      </div>
+
+      <div class="card" id="campaignAreasCard" style="display:none;">
+        <h3>Areas Analysis</h3>
+        <div id="campaignPracticeInfo" style="margin-bottom:15px; padding:10px; background:#f5f5f5; border-radius:6px;"></div>
+        <div class="filter-row">
+          <button class="btn" onclick="findCampaignAreas()">🔍 Find Areas</button>
+          <button class="btn btn-secondary" onclick="fetchCampaignKeywordCosts()">💰 Fetch Keyword Costs</button>
+          <button class="btn btn-success" onclick="runCampaignAnalysis()">📊 Run Analysis</button>
+        </div>
+        <div id="campaignAreasStatus" style="margin-top:15px;"></div>
+      </div>
+
+      <div class="card" id="campaignResultsCard" style="display:none;">
+        <h3>Keyword Costs by Specialty</h3>
+        <div class="form-group">
+          <label>Filter by Specialty</label>
+          <select id="campaignSpecialtyFilter" onchange="filterCampaignKeywords()">
+            <option value="">All Procedures</option>
+            <option value="veneers">Full Mouth Veneers</option>
+            <option value="invisalign">Invisalign</option>
+            <option value="all-on-4">All-on-4 Implants</option>
+            <option value="implants">Dental Implants</option>
+            <option value="cosmetic">Cosmetic Dentistry</option>
+          </select>
+        </div>
+        <div id="campaignKeywordTable" style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse;">
+      <thead>
+              <tr style="background:#f5f5f5;">
+                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Area</th>
+                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Keyword</th>
+                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Specialty</th>
+                <th style="padding:10px; text-align:right; border-bottom:2px solid #ddd;">Avg CPC</th>
+                <th style="padding:10px; text-align:right; border-bottom:2px solid #ddd;">Min CPC</th>
+                <th style="padding:10px; text-align:right; border-bottom:2px solid #ddd;">Max CPC</th>
+                <th style="padding:10px; text-align:right; border-bottom:2px solid #ddd;">Volume</th>
+                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Competition</th>
+        </tr>
+      </thead>
+            <tbody id="campaignKeywordTableBody">
+            </tbody>
+    </table>
+        </div>
+      </div>
+
+      <div class="card" id="campaignAnalysisCard" style="display:none;">
+        <h3>Opportunity Analysis</h3>
+        <div id="campaignAnalysisResults"></div>
       </div>
     </div>
 
@@ -1441,6 +1703,11 @@
 
     // Load stats on page load
     window.addEventListener('DOMContentLoaded', () => {
+      // Show stats grid since reviews tab is active by default
+      const statsGrid = document.getElementById('statsGrid');
+      if (statsGrid) {
+        statsGrid.style.display = 'grid';
+      }
       loadStats();
       loadReviews();
       checkGoogleConnection();
@@ -1839,10 +2106,10 @@
           wrap.style.display = 'none';
         }
 
-        // Team tab visibility for Owner/Admin
-        const teamTab = document.getElementById('teamTab');
-        if (teamTab) {
-          teamTab.style.display = (activeRole === 'OWNER' || activeRole === 'ADMIN') ? 'block' : 'none';
+        // Team button visibility in profile dropdown for Owner/Admin
+        const teamProfileBtn = document.getElementById('teamProfileBtn');
+        if (teamProfileBtn) {
+          teamProfileBtn.style.display = (activeRole === 'OWNER' || activeRole === 'ADMIN') ? 'block' : 'none';
         }
       } catch (e) {
         // non-fatal
@@ -1889,6 +2156,206 @@
         if (statusEl) statusEl.textContent = e.message || 'Invite failed';
       } finally {
         if (btn) btn.disabled = false;
+      }
+    }
+
+    // Campaigns / Geographic Keyword Analysis
+    let currentPracticeId = null;
+    let allKeywordCosts = [];
+
+    async function loadCampaignPractice() {
+      try {
+        const res = await fetch('/api/geographic/practices');
+        const data = await res.json().catch(() => []);
+        if (Array.isArray(data) && data.length > 0) {
+          const practice = data[0];
+          currentPracticeId = practice.id;
+          document.getElementById('campaignPracticeName').value = practice.name || '';
+          document.getElementById('campaignPracticeAddress').value = practice.address || '';
+          document.getElementById('campaignRadius').value = practice.radiusMiles || 20;
+          document.getElementById('campaignAreasCard').style.display = 'block';
+          document.getElementById('campaignPracticeInfo').innerHTML = `
+            <strong>${practice.name}</strong><br>
+            ${practice.address}<br>
+            <small>Radius: ${practice.radiusMiles} miles | Areas: ${practice._count?.areas || 0}</small>
+          `;
+        }
+      } catch (e) {
+        console.error('Failed to load practice:', e);
+      }
+    }
+
+    async function saveCampaignPractice() {
+      const name = document.getElementById('campaignPracticeName').value.trim();
+      const address = document.getElementById('campaignPracticeAddress').value.trim();
+      const radius = parseInt(document.getElementById('campaignRadius').value) || 20;
+
+      if (!name || !address) {
+        showError('Practice name and address are required');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/geographic/practice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, address, radiusMiles: radius }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to save practice');
+        currentPracticeId = data.practice?.id || null;
+        showSuccess('Practice location saved');
+        await loadCampaignPractice();
+      } catch (e) {
+        showError(e.message || 'Failed to save practice');
+      }
+    }
+
+    async function findCampaignAreas() {
+      if (!currentPracticeId) {
+        showError('Please save a practice location first');
+        return;
+      }
+      const statusEl = document.getElementById('campaignAreasStatus');
+      if (statusEl) statusEl.innerHTML = '<div style="color:#666;">Finding areas...</div>';
+      try {
+        const res = await fetch('/api/geographic/areas/find', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ practiceId: currentPracticeId, forceRefresh: false }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to find areas');
+        if (statusEl) statusEl.innerHTML = `<div style="color:green;">✓ Found ${data.count || 0} areas within radius</div>`;
+        showSuccess(`Found ${data.count || 0} areas`);
+      } catch (e) {
+        if (statusEl) statusEl.innerHTML = `<div style="color:red;">Error: ${e.message}</div>`;
+        showError(e.message || 'Failed to find areas');
+      }
+    }
+
+    async function fetchCampaignKeywordCosts() {
+      if (!currentPracticeId) {
+        showError('Please save a practice location first');
+        return;
+      }
+      showInfo('Fetching keyword costs... This may take a few minutes.');
+      try {
+        const res = await fetch('/api/keywords/costs/fetch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ practiceId: currentPracticeId, forceRefresh: false }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to fetch keyword costs');
+        showSuccess('Keyword cost fetching started. Check back in a few minutes.');
+        setTimeout(() => loadCampaignKeywordCosts(), 5000);
+      } catch (e) {
+        showError(e.message || 'Failed to fetch keyword costs');
+      }
+    }
+
+    async function loadCampaignKeywordCosts() {
+      if (!currentPracticeId) return;
+      try {
+        const res = await fetch(`/api/keywords/costs?practiceId=${currentPracticeId}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to load keyword costs');
+        allKeywordCosts = Array.isArray(data.costs) ? data.costs : [];
+        document.getElementById('campaignResultsCard').style.display = 'block';
+        filterCampaignKeywords();
+      } catch (e) {
+        console.error('Failed to load keyword costs:', e);
+      }
+    }
+
+    function filterCampaignKeywords() {
+      const specialty = document.getElementById('campaignSpecialtyFilter').value;
+      const filtered = specialty 
+        ? allKeywordCosts.filter(c => c.specialtyType === specialty)
+        : allKeywordCosts;
+      
+      const tbody = document.getElementById('campaignKeywordTableBody');
+      if (!tbody) return;
+      
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#666;">No keyword cost data available</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(cost => {
+        const competitionColor = {
+          'LOW': 'green',
+          'MEDIUM': 'orange',
+          'HIGH': 'red'
+        }[cost.competition] || 'gray';
+        return `
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #eee;">${cost.area?.name || 'Unknown'}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">${cost.keyword}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">${cost.specialtyType || '-'}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$${cost.avgCpc.toFixed(2)}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$${cost.minCpc.toFixed(2)}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$${cost.maxCpc.toFixed(2)}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${cost.searchVolume.toLocaleString()}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">
+              <span style="color:${competitionColor}; font-weight:600;">${cost.competition}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function runCampaignAnalysis() {
+      if (!currentPracticeId) {
+        showError('Please save a practice location first');
+        return;
+      }
+      showInfo('Running analysis... This may take a few minutes.');
+      try {
+        const res = await fetch('/api/geographic/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ practiceId: currentPracticeId, forceRefresh: false }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'Failed to run analysis');
+        document.getElementById('campaignAnalysisCard').style.display = 'block';
+        const resultsEl = document.getElementById('campaignAnalysisResults');
+        if (resultsEl && data.analysis) {
+          const topAreas = data.analysis.rankedAreas || [];
+          resultsEl.innerHTML = `
+            <div style="margin-bottom:15px; padding:15px; background:#f0f7ff; border-radius:6px;">
+              <strong>Summary:</strong> ${data.analysis.summary || ''}
+            </div>
+            <h4>Top Opportunity Areas:</h4>
+            <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+              <thead>
+                <tr style="background:#f5f5f5;">
+                  <th style="padding:10px; text-align:left;">Area</th>
+                  <th style="padding:10px; text-align:right;">Score</th>
+                  <th style="padding:10px; text-align:right;">Avg CPC</th>
+                  <th style="padding:10px; text-align:right;">Volume</th>
+                  <th style="padding:10px; text-align:right;">Distance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${topAreas.slice(0, 10).map(area => `
+                  <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">${area.areaName}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${area.score.toFixed(2)}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$${area.avgCpc.toFixed(2)}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${area.totalVolume.toLocaleString()}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${area.distanceMiles.toFixed(1)} mi</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+        showSuccess('Analysis complete');
+      } catch (e) {
+        showError(e.message || 'Failed to run analysis');
       }
     }
 
@@ -2364,19 +2831,43 @@
       showNotification('warning', title, message);
     }
 
+    function toggleNavItem(itemId) {
+      const item = document.getElementById(itemId);
+      if (item) {
+        item.classList.toggle('expanded');
+      }
+    }
+
     function showTab(tabName, event) {
-      // Hide all tabs
+      // Hide all tab content
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
       });
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
+      
+      // Update sidebar navigation active states
+      document.querySelectorAll('.nav-submenu .nav-link, .nav-item > .nav-link').forEach(link => {
+        link.classList.remove('active');
       });
-
+      
+      // Show/hide stats grid based on tab
+      const statsGrid = document.getElementById('statsGrid');
+      if (statsGrid) {
+        statsGrid.style.display = (tabName === 'reviews') ? 'grid' : 'none';
+      }
+      
       // Show selected tab
       document.getElementById(tabName).classList.add('active');
-      if (event && event.target) {
-        event.target.classList.add('active');
+      
+      // Update active state in sidebar
+      const activeNavLink = document.querySelector(`.nav-submenu .nav-link[data-tab="${tabName}"], .nav-item > .nav-link[data-tab="${tabName}"]`);
+      if (activeNavLink) {
+        activeNavLink.classList.add('active');
+      }
+      
+      // Close profile dropdown if open
+      const profileDropdown = document.getElementById('profileDropdown');
+      if (profileDropdown) {
+        profileDropdown.classList.remove('open');
       }
 
       // Load data for specific tabs
@@ -2388,18 +2879,46 @@
         loadCompetitive();
       } else if (tabName === 'team') {
         loadTeam();
+      } else if (tabName === 'campaigns') {
+        loadCampaignPractice();
       }
     }
 
     async function loadCompetitive() {
       try {
-        await loadCompetitiveList();
+        // Load with current radius from input (default 10)
+        const radiusMiles = parseInt(document.getElementById('compRadius')?.value || '10');
+        await loadCompetitiveList(radiusMiles);
       } catch (e) {
         // non-fatal
       }
     }
 
-    async function loadCompetitiveList() {
+    // Global map instance
+    let competitiveMapInstance = null;
+    let competitiveMapMarkers = [];
+    let competitiveMapCircle = null;
+    let competitiveBusinessMarker = null; // Green marker for business location
+    let competitiveFilteredCompetitors = []; // Store filtered competitors for list
+    let competitorCurrentPage = 1;
+    const competitorItemsPerPage = 10;
+    let businessLocationCoords = null; // Store business location coordinates
+    
+    // Community mapping layers
+    let communityPointMarkers = [];
+    let demographicHeatmapLayer = null;
+    let demographicHeatmapData = null;
+    let activeLayers = {
+      competitors: true,
+      employers: true,
+      hospitals: true,
+      schools: true,
+      demographicsIncome: false,
+      demographicsPopulation: false,
+    };
+    let currentDemographicData = null;
+
+    async function loadCompetitiveList(radiusMiles = null) {
       const listEl = document.getElementById('competitiveList');
       if (listEl) listEl.innerHTML = '<div style="color:#666;">Loading...</div>';
       try {
@@ -2408,38 +2927,921 @@
         if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to load competitors');
         const competitors = Array.isArray(data.competitors) ? data.competitors : [];
         if (competitors.length === 0) {
-          if (listEl) listEl.innerHTML = '<div style="color:#666;">No competitors yet. Use “Discover” above.</div>';
+          competitiveFilteredCompetitors = [];
+          if (listEl) listEl.innerHTML = '<div style="color:#666;">No competitors yet. Use "Discover" above.</div>';
+          // Show map with placeholder
+          await initializeCompetitiveMap([], radiusMiles);
           return;
         }
-        const rows = competitors.map((c) => {
-          const name = escapeHtml(c.name || c.placeId);
-          const addr = escapeHtml(c.address || '');
-          const status = escapeHtml(c.status || 'active');
-          const locked = !!c.locked;
-          const badgeCls = status === 'active' ? 'badge-success' : 'badge-warning';
-          return `
-            <div class="review-item" style="margin-bottom: 12px;">
-              <div class="review-header">
+        
+        // Reset pagination when loading new competitors
+        competitorCurrentPage = 1;
+        
+        // Initialize/update map with competitors and radius
+        // The map will filter and render the list via renderCompetitorList
+        try {
+          const currentRadius = radiusMiles || parseInt(document.getElementById('compRadius')?.value || '10');
+          await initializeCompetitiveMap(competitors, currentRadius);
+        } catch (mapError) {
+          console.error('Error initializing map:', mapError);
+          // If map fails, still render list with all competitors
+          competitiveFilteredCompetitors = competitors;
+          renderCompetitorList(competitors);
+        }
+      } catch (e) {
+        console.error('Error loading competitive list:', e);
+        if (listEl) listEl.innerHTML = `<div style="color:#b42318;">${escapeHtml(e.message || 'Failed to load competitors')}</div>`;
+      }
+    }
+
+    async function initializeCompetitiveMap(competitors, radiusMiles = null, centerLatLng = null) {
+      const splitView = document.getElementById('competitiveSplitView');
+      const mapEl = document.getElementById('competitiveMap');
+      if (!splitView || !mapEl) return;
+
+      // Filter competitors with valid coordinates
+      const competitorsWithCoords = competitors.filter(c => 
+        c.latitude != null && c.longitude != null && 
+        typeof c.latitude === 'number' && typeof c.longitude === 'number'
+      );
+      
+      // Deduplicate competitors by name similarity
+      const deduplicatedCompetitors = deduplicateCompetitors(competitorsWithCoords);
+
+      // Fetch business location coordinates if not already cached
+      if (!businessLocationCoords) {
+        try {
+          const res = await fetch('/api/competitive/business-location');
+          const data = await res.json().catch(() => ({}));
+          if (data?.success && data?.coordinates) {
+            businessLocationCoords = data.coordinates;
+          }
+        } catch (e) {
+          console.warn('Could not fetch business location:', e);
+        }
+      }
+
+      // Show split view (it's always visible now)
+      splitView.style.display = 'flex';
+
+      // If no competitors with coordinates, show placeholder
+      if (deduplicatedCompetitors.length === 0) {
+        mapEl.innerHTML = '<div style="width:100%; height:600px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; color:#666; border-radius:8px;">No competitors with coordinates yet. Discover competitors to see them on the map.</div>';
+        // Clear map instance and circle
+        if (competitiveMapInstance) {
+          competitiveMapInstance = null;
+        }
+        if (competitiveMapCircle) {
+          competitiveMapCircle = null;
+        }
+        competitiveMapMarkers = [];
+        return;
+      }
+
+      // Restore map element structure if it was replaced with placeholder
+      // Clear any placeholder content and restore styles
+      if (mapEl.innerHTML && (mapEl.innerHTML.includes('No competitors') || mapEl.innerHTML.includes('Map will appear'))) {
+        mapEl.innerHTML = '';
+      }
+      // Ensure map container has proper styles
+      mapEl.style.width = '100%';
+      mapEl.style.height = '600px';
+      mapEl.style.borderRadius = '8px';
+      mapEl.style.overflow = 'hidden';
+      mapEl.style.background = 'transparent';
+
+      // Check if Google Maps API is loaded
+      if (typeof google === 'undefined' || !google.maps) {
+        // Load Google Maps API
+        const apiKey = 'YOUR_API_KEY_HERE';
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,visualization`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => createMapWithMarkers(deduplicatedCompetitors, mapEl, radiusMiles, centerLatLng);
+        document.head.appendChild(script);
+      } else {
+        createMapWithMarkers(deduplicatedCompetitors, mapEl, radiusMiles, centerLatLng);
+      }
+    }
+    
+    // Deduplicate competitors by name similarity
+    function deduplicateCompetitors(competitors) {
+      if (!competitors || competitors.length === 0) return [];
+      
+      // Filter out orthodontists and other non-general-dentist specialties
+      const filteredCompetitors = competitors.filter(comp => {
+        const name = (comp.name || '').toLowerCase();
+        // Exclude orthodontists, oral surgeons, periodontists, endodontists, etc.
+        const excludeTerms = ['orthodont', 'ortho ', 'oral surgery', 'oral surgeon', 'periodont', 'endodont', 'prosthodont', 'pediatric dentist'];
+        for (const term of excludeTerms) {
+          if (name.includes(term)) {
+            return false;
+          }
+        }
+        // Known orthodontist names (specific practices)
+        const knownOrthodontists = ['mellas orthodontics', 'mellas ortho'];
+        for (const orthoName of knownOrthodontists) {
+          if (name.includes(orthoName)) {
+            return false;
+          }
+        }
+        // If name is just "Mellas" or starts with "Mellas" and doesn't clearly indicate general dentistry
+        if (name.startsWith('mellas') && !name.includes('dental') && !name.includes('dentist')) {
+          return false;
+        }
+        return true;
+      });
+      
+      // Normalize name for comparison (lowercase, remove common words, punctuation)
+      const normalizeName = (name) => {
+        if (!name) return '';
+        return name.toLowerCase()
+          .replace(/[&,]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .replace(/\b(dental|dentist|dentistry|dr|doctor|dds|dmd|practice|clinic|office)\b/gi, '')
+          .trim();
+      };
+      
+      // Extract significant words (surnames, practice names) - words 4+ chars (to catch "Pilek", "Goodkin", etc.)
+      const extractSignificantWords = (normalized) => {
+        return normalized.split(/\s+/).filter(w => w.length >= 4);
+      };
+      
+      // Group by normalized name
+      const groups = new Map();
+      filteredCompetitors.forEach(comp => {
+        const normalized = normalizeName(comp.name);
+        if (!normalized) {
+          // If no name, use placeId as key
+          const key = comp.placeId || comp.id;
+          if (!groups.has(key)) {
+            groups.set(key, []);
+          }
+          groups.get(key).push(comp);
+          return;
+        }
+        
+        // Check if similar name already exists (fuzzy matching)
+        let found = false;
+        const normWords = extractSignificantWords(normalized);
+        
+        for (const [key, group] of groups.entries()) {
+          // Exact match
+          if (key === normalized) {
+            group.push(comp);
+            found = true;
+            break;
+          }
+          
+          // Check if names share significant words (surnames, practice names)
+          const keyWords = extractSignificantWords(key);
+          const commonWords = keyWords.filter(w => normWords.includes(w));
+          
+          // Match if they share at least one significant word (for cases like "Pilek Jared" and "Goodkin and Pilek")
+          // This will match "pilek" in both "pilek jared" and "goodkin pilek"
+          if (commonWords.length >= 1) {
+            // Always match if they share a significant word (5+ chars like "Pilek", "Goodkin")
+            // This ensures "Pilek Jared" matches "Goodkin and Pilek"
+            const hasLongCommonWord = commonWords.some(w => w.length >= 5);
+            if (hasLongCommonWord || keyWords.length <= 2 || normWords.length <= 2 || commonWords.length >= 2) {
+              group.push(comp);
+              found = true;
+              break;
+            }
+          }
+          
+          // Check if one name contains the other (for cases like "Goodkin and Pilek" vs "Goodkin & Pilek")
+          if ((normalized.length > 5 && key.includes(normalized.substring(0, Math.min(8, normalized.length)))) ||
+              (key.length > 5 && normalized.includes(key.substring(0, Math.min(8, key.length))))) {
+            group.push(comp);
+            found = true;
+            break;
+          }
+        }
+        
+        if (!found) {
+          groups.set(normalized, [comp]);
+        }
+      });
+      
+      // Return first competitor from each group (prefer one with more complete data)
+      const deduplicated = [];
+      groups.forEach(group => {
+        if (group.length === 1) {
+          deduplicated.push(group[0]);
+        } else {
+          // If multiple, prefer the one with address or more complete name
+          const sorted = group.sort((a, b) => {
+            if (a.address && !b.address) return -1;
+            if (!a.address && b.address) return 1;
+            // Prefer longer/more complete names
+            const aNameLen = (a.name || '').length;
+            const bNameLen = (b.name || '').length;
+            if (aNameLen !== bNameLen) return bNameLen - aNameLen;
+            return 0;
+          });
+          deduplicated.push(sorted[0]);
+        }
+      });
+      
+      return deduplicated;
+    }
+
+    function createMapWithMarkers(competitors, mapEl, radiusMiles = null, centerLatLng = null) {
+      if (!competitors || competitors.length === 0) return;
+
+      // Calculate bounds to fit all markers
+      const bounds = new google.maps.LatLngBounds();
+      const markers = [];
+
+      // Determine center - prioritize business location, then provided center, then average of competitors
+      let center = centerLatLng;
+      if (!center && businessLocationCoords && businessLocationCoords.latitude && businessLocationCoords.longitude) {
+        // Use business location as center (for radius circle)
+        center = { lat: businessLocationCoords.latitude, lng: businessLocationCoords.longitude };
+      } else if (!center && competitors.length > 0) {
+        // Calculate average center from competitors
+        const avgLat = competitors.reduce((sum, c) => sum + c.latitude, 0) / competitors.length;
+        const avgLng = competitors.reduce((sum, c) => sum + c.longitude, 0) / competitors.length;
+        center = { lat: avgLat, lng: avgLng };
+      } else if (!center && competitors.length === 1) {
+        center = { lat: competitors[0].latitude, lng: competitors[0].longitude };
+      }
+
+      // Create or reuse map instance
+      if (!competitiveMapInstance) {
+        competitiveMapInstance = new google.maps.Map(mapEl, {
+          zoom: 12,
+          center: center || { lat: competitors[0].latitude, lng: competitors[0].longitude },
+          mapTypeControl: true,
+          streetViewControl: false,
+          fullscreenControl: true,
+        });
+        setupMapClickListener();
+      }
+
+      // Clear existing markers and circle
+      competitiveMapMarkers.forEach(m => m.setMap(null));
+      competitiveMapMarkers = [];
+      if (competitiveMapCircle) {
+        competitiveMapCircle.setMap(null);
+        competitiveMapCircle = null;
+      }
+      if (competitiveBusinessMarker) {
+        competitiveBusinessMarker.setMap(null);
+        competitiveBusinessMarker = null;
+      }
+
+      // Calculate distance using Haversine formula (shared function)
+      const calculateDistance = (lat1, lng1, lat2, lng2) => {
+        const R = 6371; // Earth radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in km
+      };
+      
+      // Filter competitors by radius if center and radius are provided
+      let competitorsInRadius = competitors;
+      if (center && radiusMiles && typeof radiusMiles === 'number' && radiusMiles > 0) {
+        const radiusMeters = radiusMiles * 1609.34; // Convert miles to meters
+        const radiusKm = radiusMiles * 1.60934; // Convert miles to km for haversine
+        
+        competitorsInRadius = competitors.filter(comp => {
+          if (!comp.latitude || !comp.longitude) return false;
+          const distance = calculateDistance(center.lat, center.lng, comp.latitude, comp.longitude);
+          return distance <= radiusKm;
+        });
+        
+        // Add radius circle
+        competitiveMapCircle = new google.maps.Circle({
+          strokeColor: '#667eea',
+          strokeOpacity: 0.6,
+          strokeWeight: 2,
+          fillColor: '#667eea',
+          fillOpacity: 0.15,
+          map: competitiveMapInstance,
+          center: center,
+          radius: radiusMeters,
+        });
+      }
+      
+      // Sort competitors by distance from business (nearest first)
+      // calculateDistance is already defined above
+      let sortedCompetitors = competitorsInRadius;
+      if (businessLocationCoords && businessLocationCoords.latitude && businessLocationCoords.longitude) {
+        sortedCompetitors = competitorsInRadius.map(comp => ({
+          ...comp,
+          distanceFromBusiness: calculateDistance(
+            businessLocationCoords.latitude,
+            businessLocationCoords.longitude,
+            comp.latitude,
+            comp.longitude
+          )
+        })).sort((a, b) => (a.distanceFromBusiness || Infinity) - (b.distanceFromBusiness || Infinity));
+      }
+      
+      // Store filtered and sorted competitors globally for list rendering
+      competitiveFilteredCompetitors = sortedCompetitors;
+      
+      // Add business location marker (green) if coordinates available
+      if (businessLocationCoords && businessLocationCoords.latitude && businessLocationCoords.longitude) {
+        const businessPosition = { lat: businessLocationCoords.latitude, lng: businessLocationCoords.longitude };
+        bounds.extend(businessPosition);
+        
+        competitiveBusinessMarker = new google.maps.Marker({
+          position: businessPosition,
+          map: competitiveMapInstance,
+          title: 'Your Business',
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#10b981', // Green
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+          },
+          label: {
+            text: '★',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: 'bold',
+          },
+          zIndex: 1000, // Ensure it's on top
+        });
+        
+        const businessInfoWindow = new google.maps.InfoWindow({
+          content: `
+            <div style="padding: 8px; max-width: 250px;">
+              <strong style="font-size: 14px; display: block; margin-bottom: 4px; color: #10b981;">★ Your Business</strong>
+            </div>
+          `,
+        });
+        
+        competitiveBusinessMarker.addListener('click', () => {
+          businessInfoWindow.open(competitiveMapInstance, competitiveBusinessMarker);
+        });
+      }
+      
+      // Create markers for each competitor (only those in radius, sorted by distance)
+      sortedCompetitors.forEach((comp, index) => {
+        const position = { lat: comp.latitude, lng: comp.longitude };
+        bounds.extend(position);
+
+        const marker = new google.maps.Marker({
+          position: position,
+          map: competitiveMapInstance,
+          title: comp.name || comp.placeId,
+          label: {
+            text: String(index + 1), // Sequential numbers starting from 1
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: 'bold',
+          },
+        });
+
+        // Create info window
+        const infoWindow = new google.maps.InfoWindow({
+          content: `
+            <div style="padding: 8px; max-width: 250px;">
+              <strong style="font-size: 14px; display: block; margin-bottom: 4px;">${escapeHtml(comp.name || comp.placeId)}</strong>
+              ${comp.address ? `<div style="font-size: 12px; color: #666; margin-bottom: 4px;">${escapeHtml(comp.address)}</div>` : ''}
+              ${comp.phone ? `<div style="font-size: 12px; color: #666;">${escapeHtml(comp.phone)}</div>` : ''}
+            </div>
+          `,
+        });
+
+        marker.addListener('click', () => {
+          // Close other info windows
+          competitiveMapMarkers.forEach(m => {
+            if (m.infoWindow) m.infoWindow.close();
+          });
+          infoWindow.open(competitiveMapInstance, marker);
+        });
+
+        marker.infoWindow = infoWindow;
+        marker.pointType = 'competitor';
+        competitiveMapMarkers.push(marker);
+      });
+
+      // Fit map to show radius circle and all markers
+      let circleBounds = null;
+      if (competitiveMapCircle) {
+        circleBounds = competitiveMapCircle.getBounds();
+        if (circleBounds) {
+          // Always include circle bounds to ensure radius is visible
+          bounds.union(circleBounds);
+        }
+      }
+
+      // Update map view - prioritize fitting circle if it exists
+      if (competitiveMapCircle && circleBounds) {
+        // Fit bounds to include circle and markers with padding
+        competitiveMapInstance.fitBounds(bounds, { padding: 50 });
+      } else if (competitiveMapMarkers.length > 0) {
+        if (competitiveMapMarkers.length > 1) {
+          // Fit bounds with padding for better view
+          competitiveMapInstance.fitBounds(bounds, { padding: 50 });
+        } else if (competitiveMapMarkers.length === 1) {
+          competitiveMapInstance.setCenter(bounds.getCenter());
+          competitiveMapInstance.setZoom(14);
+        }
+      } else if (competitiveMapCircle && center && radiusMiles) {
+        // If no markers but circle exists, center on circle
+        competitiveMapInstance.setCenter(center);
+        const zoom = Math.min(14, Math.floor(Math.log2(40075 / (radiusMiles * 2))));
+        competitiveMapInstance.setZoom(zoom);
+      }
+      
+      // Render competitor list with filtered competitors
+      renderCompetitorList(competitiveFilteredCompetitors || competitorsInRadius);
+      
+      // Load community points if map is initialized
+      // Use a small delay to ensure map is fully ready
+      if (competitiveMapInstance) {
+        setTimeout(() => {
+          loadCommunityPointsOnMap();
+          loadDemographicData();
+          // Auto-load market opportunities
+          setTimeout(() => loadMarketOpportunities(), 1000);
+        }, 500);
+      }
+    }
+    
+    // Load demographic data and create heatmap
+    async function loadDemographicData() {
+      try {
+        console.log('Loading demographic data...');
+        const radiusMiles = parseInt(document.getElementById('compRadius')?.value || '10');
+        const businessLocation = businessLocationCoords || await getBusinessLocation();
+        
+        if (!businessLocation) {
+          console.warn('No business location available for demographic data');
+          return;
+        }
+        
+        const locationStr = `${businessLocation.latitude},${businessLocation.longitude}`;
+        const res = await fetch(`/api/competitive/community/demographics?location=${encodeURIComponent(locationStr)}&radiusMiles=${radiusMiles}`);
+        const data = await res.json();
+        console.log('Demographic data response:', data);
+        
+        if (data.success && data.demographics && data.demographics.length > 0) {
+          currentDemographicData = data.demographics;
+          console.log(`Loaded ${data.demographics.length} demographic data points`);
+          // Check if any heatmap layer is active, if so update
+          if (activeLayers.demographicsIncome || activeLayers.demographicsPopulation) {
+            updateDemographicHeatmap();
+          }
+        } else {
+          console.warn('No demographic data returned:', data);
+        }
+      } catch (e) {
+        console.error('Failed to load demographic data:', e);
+      }
+    }
+    
+    // Update demographic heatmap based on active layer
+    function updateDemographicHeatmap() {
+      console.log('updateDemographicHeatmap called', {
+        hasMap: !!competitiveMapInstance,
+        hasData: !!currentDemographicData,
+        dataLength: currentDemographicData?.length || 0,
+        activeLayers
+      });
+      
+      if (!competitiveMapInstance) {
+        console.warn('Map instance not ready for heatmap');
+        return;
+      }
+      
+      // Check if visualization library is loaded
+      if (typeof google === 'undefined' || !google.maps || !google.maps.visualization) {
+        console.error('Google Maps Visualization library not loaded');
+        return;
+      }
+      
+      if (!currentDemographicData || currentDemographicData.length === 0) {
+        console.warn('No demographic data available for heatmap');
+        return;
+      }
+      
+      // Remove existing heatmap
+      if (demographicHeatmapLayer) {
+        demographicHeatmapLayer.setMap(null);
+        demographicHeatmapLayer = null;
+      }
+      
+      // Determine which metric to show
+      let metric = null;
+      if (activeLayers.demographicsIncome) {
+        metric = 'income';
+      } else if (activeLayers.demographicsPopulation) {
+        metric = 'population';
+      }
+      
+      if (!metric) {
+        console.log('No heatmap metric active');
+        return;
+      }
+      
+      console.log(`Creating ${metric} heatmap with ${currentDemographicData.length} data points`);
+      
+      // Create weighted heatmap data points
+      const heatmapData = [];
+      let maxValue = 0;
+      let minValue = Infinity;
+      
+      for (const d of currentDemographicData) {
+        const value = metric === 'income' ? (d.householdIncome || 0) : (d.population || 0);
+        if (value > 0) {
+          maxValue = Math.max(maxValue, value);
+          minValue = Math.min(minValue, value);
+          heatmapData.push({
+            location: new google.maps.LatLng(d.latitude, d.longitude),
+            weight: value
+          });
+        }
+      }
+      
+      if (heatmapData.length === 0) {
+        console.warn(`No valid ${metric} data points found`);
+        return;
+      }
+      
+      console.log(`Heatmap data: ${heatmapData.length} points, range: ${minValue} - ${maxValue}`);
+      
+      // Normalize weights for better visualization (optional - Google Maps handles this)
+      // For now, use raw values and let Google Maps normalize
+      
+      try {
+        // Create heatmap layer with weighted data
+        demographicHeatmapLayer = new google.maps.visualization.HeatmapLayer({
+          data: heatmapData,
+          map: competitiveMapInstance,
+          radius: 80, // Increased radius for better visibility
+          opacity: 0.7,
+          maxIntensity: maxValue, // Set max intensity for better contrast
+          gradient: metric === 'income' 
+            ? [
+                'rgba(0, 255, 0, 0)',
+                'rgba(0, 255, 0, 0.5)',
+                'rgba(255, 255, 0, 0.7)',
+                'rgba(255, 165, 0, 0.9)',
+                'rgba(255, 0, 0, 1)'
+              ]
+            : [
+                'rgba(0, 0, 255, 0)',
+                'rgba(0, 0, 255, 0.5)',
+                'rgba(0, 255, 255, 0.7)',
+                'rgba(255, 255, 0, 0.9)',
+                'rgba(255, 0, 0, 1)'
+              ],
+        });
+        
+        console.log('Heatmap layer created successfully');
+        demographicHeatmapData = currentDemographicData;
+      } catch (err) {
+        console.error('Failed to create heatmap layer:', err);
+      }
+    }
+    
+    // Load community points and add to map
+    async function loadCommunityPointsOnMap() {
+      try {
+        console.log('Loading community points...');
+        const res = await fetch('/api/competitive/community/points');
+        const data = await res.json();
+        console.log('Community points response:', data);
+        if (data.success && data.points && data.points.length > 0) {
+          console.log(`Found ${data.points.length} community points`);
+          addCommunityPointsToMap(data.points);
+        } else {
+          console.log('No community points found or request failed:', data);
+        }
+      } catch (e) {
+        console.error('Failed to load community points:', e);
+      }
+    }
+    
+    // Add community points to map with different icons
+    function addCommunityPointsToMap(points) {
+      if (!competitiveMapInstance) {
+        console.warn('Map instance not ready for community points');
+        return;
+      }
+      
+      if (!points || points.length === 0) {
+        console.log('No community points to add');
+        return;
+      }
+      
+      // Clear existing community markers
+      communityPointMarkers.forEach(m => m.setMap(null));
+      communityPointMarkers = [];
+      
+      // Icon colors by type
+      const iconConfig = {
+        employer: { color: '#3b82f6', path: google.maps.SymbolPath.CIRCLE, scale: 8 },
+        hospital: { color: '#ef4444', path: google.maps.SymbolPath.CIRCLE, scale: 8 },
+        school: { color: '#10b981', path: google.maps.SymbolPath.CIRCLE, scale: 8 },
+        poi: { color: '#8b5cf6', path: google.maps.SymbolPath.CIRCLE, scale: 6 },
+      };
+      
+      let addedCount = 0;
+      for (const point of points) {
+        // Validate point data
+        if (!point.latitude || !point.longitude || !point.type) {
+          console.warn('Invalid community point:', point);
+          continue;
+        }
+        
+        // Check if layer is enabled
+        const layerKey = point.type === 'employer' ? 'employers' : 
+                        point.type === 'hospital' ? 'hospitals' : 
+                        point.type === 'school' ? 'schools' : 'competitors';
+        if (!activeLayers[layerKey]) {
+          console.log(`Layer ${layerKey} is disabled, skipping ${point.name}`);
+          continue;
+        }
+        
+        const config = iconConfig[point.type] || iconConfig.poi;
+        try {
+          const marker = new google.maps.Marker({
+            position: { lat: point.latitude, lng: point.longitude },
+            map: competitiveMapInstance,
+            title: point.name,
+            icon: {
+              path: config.path,
+              fillColor: config.color,
+              fillOpacity: 0.8,
+              strokeColor: '#ffffff',
+              strokeWeight: 2,
+              scale: config.scale,
+            },
+          });
+          
+          const infoWindow = new google.maps.InfoWindow({
+            content: `
+              <div style="padding: 8px; min-width: 200px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">${escapeHtml(point.name)}</h4>
+                <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${escapeHtml(point.category || point.type)}</p>
+                <p style="margin: 0; font-size: 11px; color: #999;">${escapeHtml(point.address || '')}</p>
+                ${point.metadata ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">${JSON.stringify(point.metadata)}</p>` : ''}
+              </div>
+            `,
+          });
+          
+          marker.addListener('click', () => {
+            communityPointMarkers.forEach(m => {
+              if (m.infoWindow) m.infoWindow.close();
+            });
+            infoWindow.open(competitiveMapInstance, marker);
+          });
+          
+          marker.infoWindow = infoWindow;
+          marker.pointType = point.type;
+          communityPointMarkers.push(marker);
+          addedCount++;
+        } catch (err) {
+          console.error('Failed to create marker for point:', point, err);
+        }
+      }
+      
+      console.log(`Added ${addedCount} community point markers to map (total points: ${points.length})`);
+      
+      // Update map bounds to include community points if needed
+      if (addedCount > 0 && competitiveMapInstance) {
+        const bounds = new google.maps.LatLngBounds();
+        communityPointMarkers.forEach(m => {
+          if (m.getPosition()) {
+            bounds.extend(m.getPosition());
+          }
+        });
+        // Only adjust bounds if we have markers
+        if (!bounds.isEmpty()) {
+          // Extend existing bounds if there are competitor markers
+          competitiveMapMarkers.forEach(m => {
+            if (m.getPosition()) {
+              bounds.extend(m.getPosition());
+            }
+          });
+          competitiveMapInstance.fitBounds(bounds, { padding: 50 });
+        }
+      }
+    }
+    
+    // Toggle map layer visibility
+    function toggleMapLayer(layer, visible) {
+      activeLayers[layer] = visible;
+      
+      if (layer === 'competitors') {
+        competitiveMapMarkers.forEach(m => m.setMap(visible ? competitiveMapInstance : null));
+      } else if (layer === 'employers' || layer === 'hospitals' || layer === 'schools') {
+        // Filter community markers by type
+        const typeMap = {
+          employers: 'employer',
+          hospitals: 'hospital',
+          schools: 'school',
+        };
+        const targetType = typeMap[layer];
+        if (!targetType) {
+          console.warn('Unknown layer type:', layer);
+          return;
+        }
+        let toggledCount = 0;
+        communityPointMarkers.forEach(m => {
+          if (m.pointType === targetType) {
+            m.setMap(visible ? competitiveMapInstance : null);
+            toggledCount++;
+          }
+        });
+        console.log(`Toggled ${toggledCount} ${layer} markers (visible: ${visible})`);
+        // If we just enabled a layer but no markers are showing, reload community points
+        if (visible && toggledCount === 0 && communityPointMarkers.length === 0) {
+          console.log('Layer enabled but no markers found, reloading community points...');
+          loadCommunityPointsOnMap();
+        }
+      } else if (layer === 'demographicsIncome' || layer === 'demographicsPopulation') {
+        // Toggle heatmap
+        console.log(`Toggling ${layer} heatmap: ${visible}`);
+        if (visible) {
+          // If other demographic layer is active, turn it off
+          if (layer === 'demographicsIncome') {
+            activeLayers.demographicsPopulation = false;
+            const popCheckbox = document.getElementById('layerDemographicsPopulation');
+            if (popCheckbox) popCheckbox.checked = false;
+          } else {
+            activeLayers.demographicsIncome = false;
+            const incomeCheckbox = document.getElementById('layerDemographicsIncome');
+            if (incomeCheckbox) incomeCheckbox.checked = false;
+          }
+          // Ensure demographic data is loaded before creating heatmap
+          if (!currentDemographicData || currentDemographicData.length === 0) {
+            console.log('No demographic data loaded, loading now...');
+            loadDemographicData().then(() => {
+              // Small delay to ensure data is set
+              setTimeout(() => updateDemographicHeatmap(), 100);
+            });
+          } else {
+            updateDemographicHeatmap();
+          }
+        } else {
+          if (demographicHeatmapLayer) {
+            demographicHeatmapLayer.setMap(null);
+            demographicHeatmapLayer = null;
+            console.log('Heatmap layer removed');
+          }
+        }
+      }
+    }
+    
+    // Discover community points
+    async function discoverCommunityPoints() {
+      try {
+        const radiusMiles = parseInt(document.getElementById('compRadius')?.value || '10');
+        const businessLocation = businessLocationCoords || await getBusinessLocation();
+        
+        if (!businessLocation) {
+          alert('Business location is required. Please set your business address first.');
+          return;
+        }
+        
+        const button = event?.target;
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Discovering...';
+        }
+        
+        const res = await fetch('/api/competitive/community/discover', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: businessLocation,
+            radiusMiles,
+            forceRefresh: false,
+          }),
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert(`Discovered ${data.upserted} community points!`);
+          await loadCommunityPointsOnMap();
+        } else {
+          throw new Error(data.error || 'Failed to discover community points');
+        }
+      } catch (e) {
+        console.error('Failed to discover community points:', e);
+        alert('Failed to discover community points: ' + (e.message || 'Unknown error'));
+      } finally {
+        const button = event?.target;
+        if (button) {
+          button.disabled = false;
+          button.textContent = '🔍 Discover Community';
+        }
+      }
+    }
+    
+    // Get business location coordinates
+    async function getBusinessLocation() {
+      try {
+        const res = await fetch('/api/competitive/business-location');
+        const data = await res.json();
+        if (data.success && data.location) {
+          return {
+            latitude: data.location.latitude,
+            longitude: data.location.longitude,
+          };
+        }
+      } catch (e) {
+        console.error('Failed to get business location:', e);
+      }
+      return null;
+    }
+    
+    function renderCompetitorList(competitors) {
+      const listEl = document.getElementById('competitiveList');
+      const countEl = document.getElementById('competitorCount');
+      const paginationEl = document.getElementById('competitivePagination');
+      if (!listEl) return;
+      
+      const totalCompetitors = competitors.length;
+      if (countEl) {
+        countEl.textContent = `(${totalCompetitors})`;
+      }
+      
+      if (totalCompetitors === 0) {
+        listEl.innerHTML = '<div style="color:#666;">No competitors within the search radius.</div>';
+        if (paginationEl) paginationEl.style.display = 'none';
+        return;
+      }
+      
+      // Calculate pagination
+      const totalPages = Math.ceil(totalCompetitors / competitorItemsPerPage);
+      const startIndex = (competitorCurrentPage - 1) * competitorItemsPerPage;
+      const endIndex = Math.min(startIndex + competitorItemsPerPage, totalCompetitors);
+      const pageCompetitors = competitors.slice(startIndex, endIndex);
+      
+      // Render competitors with numbering matching map markers
+      const rows = pageCompetitors.map((c, idx) => {
+        const number = startIndex + idx + 1; // Match map marker numbers
+        const name = escapeHtml(c.name || c.placeId);
+        const addr = escapeHtml(c.address || '');
+        const status = escapeHtml(c.status || 'active');
+        const locked = !!c.locked;
+        const badgeCls = status === 'active' ? 'badge-success' : 'badge-warning';
+        return `
+          <div class="review-item" style="margin-bottom: 12px;">
+            <div class="review-header">
+              <div style="min-width:0; display:flex; align-items:center; gap:10px;">
+                <span style="background:#667eea; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; flex-shrink:0;">${number}</span>
                 <div style="min-width:0;">
                   <div style="font-weight:800;">${name}</div>
                   <div class="small-muted" style="word-break:break-word;">${addr}</div>
-                </div>
-                <div>
-                  <span class="badge ${badgeCls}">${status}</span>
-                  <span class="badge badge-info">${locked ? 'locked' : 'unlocked'}</span>
+                  ${c.distanceFromBusiness != null ? `<div class="small-muted" style="font-size:0.85em; color:#10b981; margin-top:2px;">📍 ${c.distanceFromBusiness.toFixed(1)} km away</div>` : ''}
                 </div>
               </div>
-              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
-                <button class="btn btn-secondary btn-sm" onclick="showCompetitorInsights('${c.id}')">📈 View insights</button>
-                <button class="btn btn-secondary btn-sm" onclick="toggleCompetitorLock('${c.id}', ${locked ? 'false' : 'true'})">${locked ? '🔓 Unlock' : '🔒 Lock'}</button>
-                <button class="btn btn-secondary btn-sm" onclick="toggleCompetitorStatus('${c.id}', '${status === 'active' ? 'hidden' : 'active'}')">${status === 'active' ? '🙈 Hide' : '👁️ Activate'}</button>
+              <div>
+                <span class="badge ${badgeCls}">${status}</span>
+                <span class="badge badge-info">${locked ? 'locked' : 'unlocked'}</span>
               </div>
             </div>
-          `;
-        }).join('');
-        if (listEl) listEl.innerHTML = rows;
-      } catch (e) {
-        if (listEl) listEl.innerHTML = `<div style="color:#b42318;">${escapeHtml(e.message || 'Failed to load competitors')}</div>`;
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
+              <button class="btn btn-secondary btn-sm" onclick="showCompetitorInsights('${c.id}')">📈 View insights</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleCompetitorLock('${c.id}', ${locked ? 'false' : 'true'})">${locked ? '🔓 Unlock' : '🔒 Lock'}</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleCompetitorStatus('${c.id}', '${status === 'active' ? 'hidden' : 'active'}')">${status === 'active' ? '🙈 Hide' : '👁️ Activate'}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      listEl.innerHTML = rows;
+      
+      // Show/hide pagination
+      if (totalPages > 1 && paginationEl) {
+        paginationEl.style.display = 'flex';
+        const pageInfoEl = document.getElementById('pageInfo');
+        if (pageInfoEl) {
+          pageInfoEl.textContent = `Page ${competitorCurrentPage} of ${totalPages} (${startIndex + 1}-${endIndex} of ${totalCompetitors})`;
+        }
+        const prevBtn = document.getElementById('prevPage');
+        const nextBtn = document.getElementById('nextPage');
+        if (prevBtn) prevBtn.disabled = competitorCurrentPage === 1;
+        if (nextBtn) nextBtn.disabled = competitorCurrentPage === totalPages;
+      } else if (paginationEl) {
+        paginationEl.style.display = 'none';
+      }
+    }
+    
+    function changeCompetitorPage(direction) {
+      const totalCompetitors = competitiveFilteredCompetitors.length;
+      const totalPages = Math.ceil(totalCompetitors / competitorItemsPerPage);
+      const newPage = competitorCurrentPage + direction;
+      if (newPage >= 1 && newPage <= totalPages) {
+        competitorCurrentPage = newPage;
+        renderCompetitorList(competitiveFilteredCompetitors);
       }
     }
 
@@ -2459,7 +3861,8 @@
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data?.success) throw new Error(data?.error || 'Discovery failed (Owner/Admin only?)');
         showSuccess(`Discovered/upserted ${data.upserted || 0} competitor(s).`, 'Competitive');
-        await loadCompetitiveList();
+        // Reload list and update map with radius
+        await loadCompetitiveList(radiusMiles);
       } catch (e) {
         showError(e.message || 'Discovery failed', 'Competitive');
       } finally {
@@ -2494,6 +3897,28 @@
         showSuccess(`Refresh complete (${data.count || 0} processed).`, 'Competitive');
       } catch (e) {
         showError(e.message || 'Refresh failed', 'Competitive');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function refreshCompetitorCoordinates(event) {
+      const btn = event?.target;
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch('/api/competitive/refresh-coordinates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to refresh coordinates (Owner/Admin only?)');
+        const msg = `Coordinates refreshed: ${data.updated || 0} updated, ${data.skipped || 0} skipped, ${data.total || 0} total.`;
+        showSuccess(msg, 'Competitive');
+        // Reload competitors list to update map
+        await loadCompetitiveList();
+      } catch (e) {
+        showError(e.message || 'Failed to refresh coordinates', 'Competitive');
       } finally {
         if (btn) btn.disabled = false;
       }
@@ -2610,17 +4035,44 @@
                 <span class="badge badge-info">Website Quality</span>
                 <span class="small-muted">${snap.websiteRating}/100</span>
                 ${websiteAnalysis ? `
-                  <details style="margin-top:8px;">
+                  <details style="margin-top:8px;" open>
                     <summary style="cursor:pointer; font-weight:700; color:#0066cc;">View detailed analysis</summary>
                     <div style="margin-top:8px; padding:12px; background:#f7f7f7; border-radius:6px; font-size:0.9rem;">
                       <div style="margin-bottom:8px;"><strong>SEO:</strong> ${websiteAnalysis.seo?.score || 0}/30 ${websiteAnalysis.seo?.details?.length ? `• ${websiteAnalysis.seo.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
                       <div style="margin-bottom:8px;"><strong>Content:</strong> ${websiteAnalysis.content?.score || 0}/30 ${websiteAnalysis.content?.details?.length ? `• ${websiteAnalysis.content.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
                       <div style="margin-bottom:8px;"><strong>Features:</strong> ${websiteAnalysis.features?.score || 0}/20 ${websiteAnalysis.features?.details?.length ? `• ${websiteAnalysis.features.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
                       <div style="margin-bottom:8px;"><strong>UX:</strong> ${websiteAnalysis.ux?.score || 0}/20 ${websiteAnalysis.ux?.details?.length ? `• ${websiteAnalysis.ux.details.slice(0, 2).map((d) => escapeHtml(d)).join(', ')}` : ''}</div>
+                      
+                      <div style="margin-top:12px; margin-bottom:8px;">
+                        <strong style="color:#667eea;">Specialty Services Offered:</strong>
+                        ${websiteAnalysis.specialty_services && websiteAnalysis.specialty_services.length > 0 ? `
+                          <div style="margin-top:4px; display:flex; flex-wrap:wrap; gap:6px;">
+                            ${websiteAnalysis.specialty_services.map((service) => 
+                              `<span style="background:#e0e7ff; color:#4338ca; padding:4px 8px; border-radius:4px; font-size:0.85em;">${escapeHtml(service)}</span>`
+                            ).join('')}
+                          </div>
+                        ` : `
+                          <div style="margin-top:4px; color:#999; font-size:0.9em;">No specialty services detected. Create a new snapshot to analyze the website for specialty services.</div>
+                        `}
+                      </div>
+                      
+                      <div style="margin-top:12px; margin-bottom:8px;">
+                        <strong style="color:#10b981;">Insurance Carriers Accepted:</strong>
+                        ${websiteAnalysis.insurance_carriers && websiteAnalysis.insurance_carriers.length > 0 ? `
+                          <div style="margin-top:4px; display:flex; flex-wrap:wrap; gap:6px;">
+                            ${websiteAnalysis.insurance_carriers.map((carrier) => 
+                              `<span style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:4px; font-size:0.85em;">${escapeHtml(carrier)}</span>`
+                            ).join('')}
+                          </div>
+                        ` : `
+                          <div style="margin-top:4px; color:#999; font-size:0.9em;">No insurance information detected. Create a new snapshot to analyze the website for accepted insurance carriers.</div>
+                        `}
+                      </div>
+                      
                       ${websiteAnalysis.recommendations?.length ? `
-                        <div style="margin-top:10px;"><strong>Recommendations:</strong>
+                        <div style="margin-top:12px;"><strong>Recommendations:</strong>
                           <ul style="margin:6px 0 0 20px; padding:0;">
-                            ${websiteAnalysis.recommendations.slice(0, 3).map((r) => `<li>${escapeHtml(r)}</li>`).join('')}
+                            ${websiteAnalysis.recommendations.slice(0, 5).map((r) => `<li style="margin-bottom:4px;">${escapeHtml(r)}</li>`).join('')}
                           </ul>
                         </div>
                       ` : ''}

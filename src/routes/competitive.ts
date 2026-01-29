@@ -8,6 +8,11 @@ import {
   recomputeCompetitorThemes,
   recomputeCompetitorKeywordOverlap,
 } from '../services/competitiveInsightsService';
+import { getPlaceDetails, isPlacesConfigured } from '../services/googlePlaces';
+import { getLocationDetails } from '../services/locationService';
+import { discoverCommunityPoints, getCommunityPoints } from '../services/communityDiscoveryService';
+import { getDemographicData } from '../services/demographicDataService';
+import { prepareMapData, generateHeatmapData, identifyCompetitorClusters, findCoverageGaps } from '../services/communityMapService';
 
 const router = express.Router();
 
@@ -234,6 +239,336 @@ router.get('/insights', async (req, res) => {
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to load insights' });
+  }
+});
+
+/**
+ * GET /api/competitive/business-location
+ * Get business location coordinates for map center
+ */
+router.get('/business-location', async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    const location = await prisma.location.findFirst({
+      where: { id: (tenant as any).locationId || undefined, businessId: tenant.businessId },
+      orderBy: { createdAt: 'asc' },
+    });
+    
+    if (!location) {
+      return res.json({ success: true, coordinates: null });
+    }
+    
+    const googleAccountId = String(location.googleAccountId || process.env.GOOGLE_ACCOUNT_ID || '').replace(/^accounts\//, '');
+    const googleLocationIdRaw = String(location.googleLocationId || process.env.GOOGLE_LOCATION_ID || '');
+    const googleLocationId = googleLocationIdRaw.startsWith('locations/') ? googleLocationIdRaw : `locations/${googleLocationIdRaw}`;
+    
+    try {
+      const coords = await getLocationDetails({ accountId: googleAccountId, locationId: googleLocationId });
+      res.json({ success: true, coordinates: { latitude: coords.latitude, longitude: coords.longitude } });
+    } catch (err: any) {
+      console.warn('Could not fetch business location coordinates:', err.message);
+      res.json({ success: true, coordinates: null });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to get business location' });
+  }
+});
+
+/**
+ * POST /api/competitive/refresh-coordinates
+ * Owner/Admin: refresh coordinates for all competitors (or a specific competitor)
+ * Body: { competitorId? } - if competitorId is provided, only refresh that one
+ */
+router.post('/refresh-coordinates', requireRole(['OWNER', 'ADMIN']), async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    if (!isPlacesConfigured()) {
+      return res.status(400).json({ error: 'GOOGLE_PLACES_API_KEY is not configured' });
+    }
+
+    const competitorId = req.body?.competitorId ? String(req.body.competitorId).trim() : null;
+
+    const where: any = { businessId: tenant.businessId };
+    if (competitorId) {
+      where.id = competitorId;
+    }
+
+    const competitors = await prisma.competitor.findMany({
+      where,
+      select: { id: true, placeId: true, name: true, locked: true },
+    });
+
+    if (competitors.length === 0) {
+      return res.json({ success: true, updated: 0, message: 'No competitors found' });
+    }
+
+    let updated = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const competitor of competitors) {
+      try {
+        const details = await getPlaceDetails({
+          placeId: competitor.placeId,
+          fieldMask: 'location',
+        });
+
+        const location = (details as any).location || {};
+        const latitude = typeof location.latitude === 'number' ? location.latitude : null;
+        const longitude = typeof location.longitude === 'number' ? location.longitude : null;
+
+        if (latitude != null && longitude != null) {
+          await prisma.competitor.update({
+            where: { id: competitor.id },
+            data: { latitude, longitude },
+          });
+          updated += 1;
+        } else {
+          skipped += 1;
+        }
+
+        // Small delay to avoid rate limiting
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } catch (err: any) {
+        errors.push(`${competitor.name || competitor.placeId}: ${err.message || 'Failed to fetch coordinates'}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      updated,
+      skipped,
+      total: competitors.length,
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to refresh coordinates' });
+  }
+});
+
+/**
+ * Discover community points (employers, hospitals, schools)
+ * POST /api/competitive/community/discover
+ */
+router.post('/community/discover', requireRole(['OWNER', 'ADMIN']), async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    const { location, radiusMiles = 20, forceRefresh = false } = req.body;
+
+    if (!location) {
+      return res.status(400).json({ error: 'location is required (address string or {latitude, longitude})' });
+    }
+
+    let locationCoords: { latitude: number; longitude: number };
+    if (typeof location === 'string') {
+      const { geocodeAddress } = await import('../utils/geocoding');
+      const geocode = await geocodeAddress(location);
+      locationCoords = { latitude: geocode.latitude, longitude: geocode.longitude };
+    } else if (location.latitude && location.longitude) {
+      locationCoords = { latitude: location.latitude, longitude: location.longitude };
+    } else {
+      return res.status(400).json({ error: 'Invalid location format' });
+    }
+
+    if (!tenant.businessId) return res.status(400).json({ error: 'Missing businessId' });
+    const result = await discoverCommunityPoints(
+      tenant.businessId,
+      locationCoords,
+      radiusMiles,
+      forceRefresh
+    );
+
+    res.json({
+      success: true,
+      ...result,
+    });
+  } catch (error: any) {
+    console.error('Failed to discover community points:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to discover community points',
+    });
+  }
+});
+
+/**
+ * Get community points for business
+ * GET /api/competitive/community/points
+ */
+router.get('/community/points', async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    if (!tenant.businessId) return res.status(400).json({ error: 'Missing businessId' });
+    const points = await getCommunityPoints(tenant.businessId);
+
+    res.json({
+      success: true,
+      points,
+      count: points.length,
+    });
+  } catch (error: any) {
+    console.error('Failed to get community points:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to get community points',
+    });
+  }
+});
+
+/**
+ * Get demographic data
+ * GET /api/competitive/community/demographics
+ */
+router.get('/community/demographics', async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    const { location, radiusMiles = 20 } = req.query;
+
+    if (!location) {
+      return res.status(400).json({ error: 'location query parameter is required' });
+    }
+
+    if (!tenant.businessId) return res.status(400).json({ error: 'Missing businessId' });
+    const data = await getDemographicData(
+      tenant.businessId,
+      String(location),
+      Number(radiusMiles)
+    );
+
+    res.json({
+      success: true,
+      demographics: data,
+      count: data.length,
+    });
+  } catch (error: any) {
+    console.error('Failed to get demographic data:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to get demographic data',
+    });
+  }
+});
+
+/**
+ * Get complete map data (all layers)
+ * GET /api/competitive/community/map-data
+ */
+router.get('/community/map-data', async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    if (!tenant.businessId) return res.status(400).json({ error: 'Missing businessId' });
+    const { location, radiusMiles = 20 } = req.query;
+
+    if (!location) {
+      // Try to get business location
+      const businessLocation = await prisma.location.findFirst({
+        where: { businessId: tenant.businessId },
+        orderBy: { createdAt: 'asc' },
+      });
+      if (!businessLocation || !businessLocation.address) {
+        return res.status(400).json({ error: 'location is required' });
+      }
+      const mapData = await prepareMapData(tenant.businessId, String(businessLocation.address), Number(radiusMiles));
+      return res.json({ success: true, ...mapData });
+    }
+
+    const mapData = await prepareMapData(tenant.businessId, String(location), Number(radiusMiles));
+
+    res.json({
+      success: true,
+      ...mapData,
+    });
+  } catch (error: any) {
+    console.error('Failed to get map data:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to get map data',
+    });
+  }
+});
+
+/**
+ * Refresh community data
+ * POST /api/competitive/community/refresh
+ */
+router.post('/community/refresh', requireRole(['OWNER', 'ADMIN']), async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    if (!tenant.businessId) return res.status(400).json({ error: 'Missing businessId' });
+    const { location, radiusMiles = 20 } = req.body;
+
+    if (!location) {
+      return res.status(400).json({ error: 'location is required' });
+    }
+
+    let locationCoords: { latitude: number; longitude: number };
+    if (typeof location === 'string') {
+      const { geocodeAddress } = await import('../utils/geocoding');
+      const geocode = await geocodeAddress(location);
+      locationCoords = { latitude: geocode.latitude, longitude: geocode.longitude };
+    } else if (location.latitude && location.longitude) {
+      locationCoords = { latitude: location.latitude, longitude: location.longitude };
+    } else {
+      return res.status(400).json({ error: 'Invalid location format' });
+    }
+
+    // Refresh both community points and demographics
+    const [pointsResult] = await Promise.all([
+      discoverCommunityPoints(tenant.businessId, locationCoords, radiusMiles, true),
+      getDemographicData(tenant.businessId, locationCoords, radiusMiles),
+    ]);
+
+    res.json({
+      success: true,
+      message: 'Community data refreshed',
+      pointsDiscovered: pointsResult.upserted,
+    });
+  } catch (error: any) {
+    console.error('Failed to refresh community data:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to refresh community data',
+    });
+  }
+});
+
+/**
+ * Get market opportunity analysis
+ * GET /api/competitive/community/opportunities
+ */
+router.get('/community/opportunities', async (req, res) => {
+  try {
+    const tenant = requireTenant(req as any);
+    if (!tenant.businessId) return res.status(400).json({ error: 'Missing businessId' });
+    const { location, radiusMiles = 20 } = req.query;
+
+    if (!location) {
+      return res.status(400).json({ error: 'location query parameter is required' });
+    }
+
+    let locationCoords: { latitude: number; longitude: number };
+    const locationStr = String(location);
+    const { geocodeAddress } = await import('../utils/geocoding');
+    const geocode = await geocodeAddress(locationStr);
+    locationCoords = { latitude: geocode.latitude, longitude: geocode.longitude };
+
+    const opportunities = await identifyCompetitorClusters(
+      tenant.businessId,
+      locationCoords,
+      Number(radiusMiles)
+    );
+
+    const gaps = await findCoverageGaps(
+      tenant.businessId,
+      locationCoords,
+      Number(radiusMiles)
+    );
+
+    res.json({
+      success: true,
+      opportunities,
+      coverageGaps: gaps,
+    });
+  } catch (error: any) {
+    console.error('Failed to get opportunities:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to get opportunities',
+    });
   }
 });
 

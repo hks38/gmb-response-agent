@@ -24,6 +24,7 @@ export interface AreaData {
  * Create or update a practice location
  */
 export async function createOrUpdatePractice(
+  businessId: string,
   name: string,
   address: string,
   radiusMiles: number = 20
@@ -31,9 +32,10 @@ export async function createOrUpdatePractice(
   // Geocode the address
   const geocodeResult = await geocodeAddress(address);
   
-  // Check if practice already exists
+  // Check if practice already exists for this business
   const existing = await prisma.practice.findFirst({
     where: {
+      businessId,
       name,
       address,
     },
@@ -65,6 +67,7 @@ export async function createOrUpdatePractice(
   // Create new practice
   const practice = await prisma.practice.create({
     data: {
+      businessId,
       name,
       address,
       latitude: geocodeResult.latitude,

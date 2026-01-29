@@ -10,12 +10,19 @@ import { prisma } from '../db/client';
 
 const router = express.Router();
 
+const requireTenant = (req: any) => {
+  const tenant = req.tenant as { businessId?: string; locationId?: string | null } | undefined;
+  if (!tenant?.businessId) throw new Error('Missing tenant context');
+  return tenant;
+};
+
 /**
  * Create or update a practice location
  * POST /api/geographic/practice
  */
 router.post('/practice', async (req, res) => {
   try {
+    const tenant = requireTenant(req as any);
     const { name, address, radiusMiles = 20 } = req.body;
 
     if (!name || !address) {
@@ -24,7 +31,7 @@ router.post('/practice', async (req, res) => {
       });
     }
 
-    const result = await createOrUpdatePractice(name, address, radiusMiles);
+    const result = await createOrUpdatePractice(tenant.businessId, name, address, radiusMiles);
 
     res.json({
       success: true,
@@ -44,7 +51,9 @@ router.post('/practice', async (req, res) => {
  */
 router.get('/practices', async (req, res) => {
   try {
+    const tenant = requireTenant(req as any);
     const practices = await prisma.practice.findMany({
+      where: { businessId: tenant.businessId },
       orderBy: { createdAt: 'desc' },
       include: {
         _count: {
@@ -71,10 +80,11 @@ router.get('/practices', async (req, res) => {
  */
 router.get('/practices/:id', async (req, res) => {
   try {
+    const tenant = requireTenant(req as any);
     const { id } = req.params;
 
-    const practice = await prisma.practice.findUnique({
-      where: { id },
+    const practice = await prisma.practice.findFirst({
+      where: { id, businessId: tenant.businessId },
       include: {
         _count: {
           select: {
@@ -185,12 +195,21 @@ router.get('/areas/:id', async (req, res) => {
  */
 router.post('/analyze', async (req, res) => {
   try {
+    const tenant = requireTenant(req as any);
     const { practiceId, forceRefresh = false } = req.body;
 
     if (!practiceId) {
       return res.status(400).json({
         error: 'practiceId is required',
       });
+    }
+
+    // Verify practice belongs to this business
+    const practice = await prisma.practice.findFirst({
+      where: { id: practiceId, businessId: tenant.businessId },
+    });
+    if (!practice) {
+      return res.status(404).json({ error: 'Practice not found' });
     }
 
     // Step 1: Find areas within radius
@@ -236,10 +255,14 @@ router.post('/analyze', async (req, res) => {
  */
 router.get('/analysis/:id', async (req, res) => {
   try {
+    const tenant = requireTenant(req as any);
     const { id } = req.params;
 
-    const analysis = await prisma.analysis.findUnique({
-      where: { id },
+    const analysis = await prisma.analysis.findFirst({
+      where: { 
+        id,
+        practice: { businessId: tenant.businessId }
+      },
       include: {
         practice: true,
       },

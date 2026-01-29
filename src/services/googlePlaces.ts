@@ -23,6 +23,7 @@ export interface PlacesPlaceDetails {
   rating?: number;
   userRatingCount?: number;
   reviews?: PlacesReview[];
+  location?: PlacesLatLng; // location.latitude, location.longitude
 }
 
 const apiKey = () => String(process.env.GOOGLE_PLACES_API_KEY || '').trim();
@@ -56,7 +57,7 @@ export async function getPlaceDetails(params: {
   if (!placeId) throw new Error('placeId is required');
   const fieldMask =
     params.fieldMask ||
-    'id,displayName,formattedAddress,internationalPhoneNumber,websiteUri,rating,userRatingCount,reviews';
+    'id,displayName,formattedAddress,internationalPhoneNumber,websiteUri,rating,userRatingCount,reviews,location';
 
   const res = await client().get(`/places/${encodeURIComponent(placeId)}`, {
     headers: {
@@ -100,9 +101,9 @@ export async function searchTextPlaces(params: {
 
   const res = await client().post(`/places:searchText`, body, {
     headers: {
-      // Only request fields we need for discovery
+      // Request fields we need for discovery and filtering
       'X-Goog-FieldMask':
-        'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.websiteUri,places.internationalPhoneNumber',
+        'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.websiteUri,places.internationalPhoneNumber,places.location,places.primaryType,places.types',
     },
   });
 

@@ -51,6 +51,13 @@ model Business {
   competitorSnapshots       CompetitorSnapshot[]
   competitorThemes          CompetitorTheme[]
   competitorKeywordProfiles CompetitorKeywordProfile[]
+
+  // Geographic keyword campaigns
+  practices Practice[]
+
+  // Community mapping
+  communityPoints CommunityPoint[]
+  demographicData DemographicData[]
 }
 
 model BusinessMembership {
@@ -105,6 +112,10 @@ model Competitor {
   address    String?
   websiteUrl String?
   phone      String?
+  
+  // Geographic coordinates (from Places API)
+  latitude   Float?
+  longitude  Float?
 
   status String  @default("active") // active | hidden
   source String  @default("discovered") // discovered | manual
@@ -458,6 +469,8 @@ model KeywordWeeklyReport {
 
 model Practice {
   id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name        String
   address     String
   latitude    Float
@@ -468,6 +481,8 @@ model Practice {
 
   areas    Area[]
   analyses Analysis[]
+
+  @@index([businessId])
 }
 
 model Area {
@@ -579,4 +594,61 @@ model AuditEvent {
   @@index([businessId, createdAt])
   @@index([actorUserId, createdAt])
   @@index([action, createdAt])
+}
+
+model CommunityPoint {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  name          String
+  type          String   // employer, hospital, school, poi
+  category      String?  // e.g., "Elementary School", "Tech Company"
+  address       String
+  latitude      Float
+  longitude     Float
+  placeId       String?  // Google Places ID
+  
+  // Metadata
+  metadataJson  String?  // JSON: {employees, students, beds, etc.}
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([businessId, type])
+  @@index([latitude, longitude])
+}
+
+model DemographicData {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Geographic area (ZIP code, census tract, or custom area)
+  areaName      String
+  areaType      String   // zip, tract, custom
+  
+  // Coordinates for map display
+  latitude      Float
+  longitude     Float
+  boundsJson    String?  // JSON polygon bounds
+  
+  // Demographic metrics
+  population    Int?
+  householdIncome Float?  // Average household income
+  medianAge     Float?
+  demographicsJson String? // JSON: {ageGroups, ethnicity, education, etc.}
+  
+  // Insurance data
+  insuranceCoverageJson String? // JSON: {medicaid, medicare, private, uninsured}
+  
+  // Traffic data
+  trafficVolume Int?     // Average daily traffic
+  trafficDataJson String? // JSON: {peakHours, patterns}
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([businessId])
+  @@unique([businessId, areaName, areaType])
 }
