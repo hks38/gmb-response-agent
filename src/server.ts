@@ -71,11 +71,22 @@ app.get('/portal', requireAuth, (_req, res) => {
 // API routes
 // --------
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
+
+// Public API endpoint for Google Maps API key (frontend needs this)
+app.get('/api/config/maps-key', (_req, res) => {
+  const key = process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY || '';
+  if (!key) {
+    return res.status(503).json({ error: 'Google Maps API key not configured' });
+  }
+  res.json({ apiKey: key });
+});
+
 app.use('/api/auth', authRouter);
 
 // Protect all other /api/* routes
 app.use('/api', (req, res, next) => {
-  if (req.path.startsWith('/auth') || req.path.startsWith('/health')) return next();
+  // Public endpoints that don't require authentication
+  if (req.path.startsWith('/auth') || req.path.startsWith('/health') || req.path.startsWith('/config')) return next();
   const cookies = parseCookies(req.headers.cookie);
   const token = cookies['app_session'];
   const user = token ? verifySessionToken(token) : null;

@@ -3012,14 +3012,24 @@
 
       // Check if Google Maps API is loaded
       if (typeof google === 'undefined' || !google.maps) {
-        // Load Google Maps API
-        const apiKey = 'YOUR_API_KEY_HERE';
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,visualization`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => createMapWithMarkers(deduplicatedCompetitors, mapEl, radiusMiles, centerLatLng);
-        document.head.appendChild(script);
+        // Load Google Maps API key from backend
+        fetch('/api/config/maps-key')
+          .then(res => res.json())
+          .then(data => {
+            if (!data.apiKey) {
+              console.error('Google Maps API key not configured');
+              return;
+            }
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=places,visualization`;
+            script.async = true;
+            script.defer = true;
+            script.onload = () => createMapWithMarkers(deduplicatedCompetitors, mapEl, radiusMiles, centerLatLng);
+            document.head.appendChild(script);
+          })
+          .catch(err => {
+            console.error('Failed to load Google Maps API key:', err);
+          });
       } else {
         createMapWithMarkers(deduplicatedCompetitors, mapEl, radiusMiles, centerLatLng);
       }
